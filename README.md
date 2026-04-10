@@ -13,7 +13,7 @@ Login and logout behavior is exposed through reusable methods on the `Account` c
 ## Run
 
 1. Start the server:
-   - `cd /home/runner/work/CSIT314/CSIT314`
+   - `cd <your-local-path>/CSIT314`
    - `python3 server.py`
 2. Open:
    - `http://127.0.0.1:8000/login.html`
@@ -22,9 +22,11 @@ The server creates `account.db` automatically (ignored in git) and ensures the `
 
 ## Demo credentials
 
-- User ID: `ua`
-- Password: `admin123`
-- Email: `ua@example.com`
-- User ID: `UATest1`
-- Password: `1234`
-- Email: `uatest1@example.com`
+- Account 1
+  - User ID: `ua`
+  - Password: `admin123`
+  - Email: `ua@example.com`
+- Account 2
+  - User ID: `UATest1`
+  - Password: `1234`
+  - Email: `uatest1@example.com`
