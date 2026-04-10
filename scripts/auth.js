@@ -31,11 +31,34 @@ function openAccountDatabase() {
 }
 
 async function hashPassword(password) {
-  const message = new TextEncoder().encode(password);
-  const digest = await window.crypto.subtle.digest("SHA-256", message);
-  return Array.from(new Uint8Array(digest))
+  const iterations = 100000;
+  const encoder = new TextEncoder();
+  const salt = window.crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const derivedBits = await window.crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    256,
+  );
+
+  const saltHex = Array.from(salt)
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
+  const hashHex = Array.from(new Uint8Array(derivedBits))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+  return `pbkdf2$${iterations}$${saltHex}$${hashHex}`;
 }
 
 async function saveAccount(account) {
