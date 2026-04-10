@@ -12,9 +12,9 @@ Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend
 
 ## Project files
 
-- `server.py` - HTTP server and login API
+- `server.py` - HTTP server and login API, talks to database and third party sources
 - `scripts/auth.js` - frontend login/logout flow and dashboard guard
-- `database/account.db` - SQLite database (auto-created at runtime)
+- `database/account.db` - SQL database (auto-created at runtime)
 - `login.html`, `dashboard.html`, `logout.html`, `styles.css` - UI
 
 ## Run
