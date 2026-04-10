@@ -41,19 +41,9 @@ class loginUA {
   }
 }
 
-class logoutUAC {
+class logoutUA {
   logout() {
     sessionStorage.removeItem("uaLoggedIn");
-  }
-}
-
-class logoutUA {
-  constructor(controller) {
-    this.controller = controller;
-  }
-
-  triggerLogout() {
-    this.controller.logout();
   }
 }
 
@@ -88,7 +78,6 @@ if (pathname.endsWith("/dashboard.html")) {
 }
 
 if (pathname.endsWith("/logout.html")) {
-  const logoutController = new logoutUAC();
-  const logoutBoundary = new logoutUA(logoutController);
-  logoutBoundary.triggerLogout();
+  const logoutBoundary = new logoutUA();
+  logoutBoundary.logout();
 }
