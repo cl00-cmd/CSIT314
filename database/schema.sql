@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS Account (
+  ID TEXT PRIMARY KEY,
+  PasswordHash TEXT NOT NULL,
+  Salt TEXT NOT NULL,
+  Iterations INTEGER NOT NULL,
+  Email TEXT NOT NULL
+);

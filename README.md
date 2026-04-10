@@ -1,7 +1,7 @@
 # CSIT314
 
 Simple UA (User Admin) login/logout prototype based on BCE and sequence flow.
-On successful login, account details are stored in browser IndexedDB in an `Account` store with `ID`, `Password` (PBKDF2 hash string), and `Email` fields.
+Authentication now uses a SQL database (SQLite) with an `Account` table.
 Login and logout behavior is exposed through reusable methods on the `Account` class.
 
 ## Pages
@@ -12,7 +12,12 @@ Login and logout behavior is exposed through reusable methods on the `Account` c
 
 ## Run
 
-Open `/home/runner/work/CSIT314/CSIT314/login.html` in a browser.
+1. Start the server:
+   - `python3 /home/runner/work/CSIT314/CSIT314/server.py`
+2. Open:
+   - `http://127.0.0.1:8000/login.html`
+
+The server creates `account.db` automatically (ignored in git) and ensures the `Account` table exists.
 
 ## Demo credentials
 
