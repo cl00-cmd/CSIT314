@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UA Login</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>User Admin Login</h1>
+      <form id="login-form">
+        <label for="userId">User ID</label>
+        <input id="userId" name="userId" type="text" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required />
+
+        <button type="submit">Login</button>
+        <p id="message" class="message" aria-live="polite"></p>
+      </form>
+    </main>
+    <script src="./scripts/auth.js"></script>
+  </body>
+  </html>
