@@ -1,7 +1,7 @@
 # CSIT314
 
 Simple UA (User Admin) login/logout prototype based on BCE and sequence flow.
-On successful login, account details are stored in browser IndexedDB in an `Account` store with `ID`, `Password`, and `Email` fields.
+On successful login, account details are stored in browser IndexedDB in an `Account` store with `ID`, `Password` (SHA-256 hash), and `Email` fields.
 
 ## Pages
 

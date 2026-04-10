@@ -30,28 +30,36 @@ function openAccountDatabase() {
   });
 }
 
-function saveAccount(account) {
-  return openAccountDatabase().then(
-    (db) =>
-      new Promise((resolve, reject) => {
-        const transaction = db.transaction(ACCOUNT_STORE_NAME, "readwrite");
-        const store = transaction.objectStore(ACCOUNT_STORE_NAME);
-        store.put({
-          ID: account.userID,
-          Password: account.password,
-          Email: account.email,
-        });
+async function hashPassword(password) {
+  const message = new TextEncoder().encode(password);
+  const digest = await window.crypto.subtle.digest("SHA-256", message);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
 
-        transaction.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        transaction.onerror = () => {
-          db.close();
-          reject(transaction.error);
-        };
-      }),
-  );
+async function saveAccount(account) {
+  const hashedPassword = await hashPassword(account.password);
+  const db = await openAccountDatabase();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(ACCOUNT_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(ACCOUNT_STORE_NAME);
+
+    store.put({
+      ID: account.userID,
+      Password: hashedPassword,
+      Email: account.email,
+    });
+
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      db.close();
+      reject(transaction.error);
+    };
+  });
 }
 
 class loginUAC {
