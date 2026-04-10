@@ -121,7 +121,7 @@ class LoginView {
 const pathname = window.location.pathname;
 const account = new Account("ua", "admin123", "ua@example.com");
 
-// Login flow
+// Login flow (login page handling)
 if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/CSIT314/")) {
   const loginView = new LoginView();
   const form = document.getElementById("login-form");
