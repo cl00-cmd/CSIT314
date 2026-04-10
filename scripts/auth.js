@@ -1,6 +1,6 @@
 class Account {
   async login(strID, strPassword) {
-    const response = await fetch("./api/login", {
+    const response = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: strID, password: strPassword }),
@@ -47,7 +47,7 @@ const pathname = window.location.pathname;
 const account = new Account();
 
 // Login flow (login page handling)
-if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/CSIT314/")) {
+if (pathname.endsWith("/login.html") || pathname === "/") {
   const loginView = new LoginView();
   const form = document.getElementById("login-form");
 

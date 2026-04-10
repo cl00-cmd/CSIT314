@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import os
 import sqlite3
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -39,7 +40,7 @@ def ensure_database() -> None:
       if existing is not None:
         continue
 
-      salt = hashlib.sha256(f"default-{user_id}-salt".encode("utf-8")).digest()[:16]
+      salt = os.urandom(16)
       password_hash = hash_password(password, salt, PBKDF2_ITERATIONS)
       connection.execute(
         """
@@ -110,8 +111,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
   ensure_database()
-  server = ThreadingHTTPServer(("127.0.0.1", 8000), RequestHandler)
-  print("Server running at http://127.0.0.1:8000")
+  host = os.environ.get("CSIT314_HOST", "127.0.0.1")
+  port = int(os.environ.get("CSIT314_PORT", "8000"))
+  server = ThreadingHTTPServer((host, port), RequestHandler)
+  print(f"Server running at http://{host}:{port}")
   server.serve_forever()
 
 

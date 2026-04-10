@@ -13,7 +13,8 @@ Login and logout behavior is exposed through reusable methods on the `Account` c
 ## Run
 
 1. Start the server:
-   - `python3 /home/runner/work/CSIT314/CSIT314/server.py`
+   - `cd /home/runner/work/CSIT314/CSIT314`
+   - `python3 server.py`
 2. Open:
    - `http://127.0.0.1:8000/login.html`
 
