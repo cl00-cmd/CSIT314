@@ -9,6 +9,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "account.db"
 PBKDF2_ITERATIONS = 100000
+DEFAULT_ACCOUNTS = (
+  ("ua", "admin123", "ua@example.com"),
+  ("UATest1", "1234", "uatest1@example.com"),
+)
 
 
 def hash_password(password: str, salt: bytes, iterations: int) -> str:
@@ -30,16 +34,19 @@ def ensure_database() -> None:
       """
     )
 
-    existing = connection.execute("SELECT 1 FROM Account WHERE ID = ?", ("ua",)).fetchone()
-    if existing is None:
-      salt = hashlib.sha256(b"default-ua-salt").digest()[:16]
-      password_hash = hash_password("admin123", salt, PBKDF2_ITERATIONS)
+    for user_id, password, email in DEFAULT_ACCOUNTS:
+      existing = connection.execute("SELECT 1 FROM Account WHERE ID = ?", (user_id,)).fetchone()
+      if existing is not None:
+        continue
+
+      salt = hashlib.sha256(f"default-{user_id}-salt".encode("utf-8")).digest()[:16]
+      password_hash = hash_password(password, salt, PBKDF2_ITERATIONS)
       connection.execute(
         """
         INSERT INTO Account (ID, PasswordHash, Salt, Iterations, Email)
         VALUES (?, ?, ?, ?, ?)
         """,
-        ("ua", password_hash, salt.hex(), PBKDF2_ITERATIONS, "ua@example.com"),
+        (user_id, password_hash, salt.hex(), PBKDF2_ITERATIONS, email),
       )
 
     connection.commit()

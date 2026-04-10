@@ -24,3 +24,6 @@ The server creates `account.db` automatically (ignored in git) and ensures the `
 - User ID: `ua`
 - Password: `admin123`
 - Email: `ua@example.com`
+- User ID: `UATest1`
+- Password: `1234`
+- Email: `uatest1@example.com`
