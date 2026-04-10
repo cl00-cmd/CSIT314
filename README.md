@@ -7,7 +7,7 @@ Login and logout behavior is exposed through reusable methods on the `Account` c
 ## Pages
 
 - `login.html` — UA enters ID and password
-- `dashboard.html` — blank dashboard with `welcome User Admin`
+- `dashboard.html` — blank dashboard with `Welcome User Admin`
 - `logout.html` — logout page that clears session and returns to login
 
 ## Run

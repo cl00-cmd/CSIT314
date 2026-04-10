@@ -20,13 +20,14 @@ class Account {
   }
 
   logout() {
-    sessionStorage.removeItem("uaLoggedIn");
+    sessionStorage.removeItem(LOGIN_SESSION_KEY);
   }
 }
 
-const DB_NAME = "UAAuthDB";
+const DB_NAME = "AccountAuthDB";
 const DB_VERSION = 1;
 const ACCOUNT_STORE_NAME = "Account";
+const LOGIN_SESSION_KEY = "accountLoggedIn";
 
 function openAccountDatabase() {
   return new Promise((resolve, reject) => {
@@ -99,16 +100,6 @@ async function saveAccount(account) {
   });
 }
 
-class LoginController {
-  constructor(account) {
-    this.account = account;
-  }
-
-  async login(strID, strPassword) {
-    return this.account.login(strID, strPassword);
-  }
-}
-
 class LoginView {
   getUserInput() {
     const idInput = document.getElementById("userId");
@@ -131,7 +122,6 @@ const pathname = window.location.pathname;
 const account = new Account("ua", "admin123", "ua@example.com");
 
 if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/CSIT314/")) {
-  const loginController = new LoginController(account);
   const loginView = new LoginView();
   const form = document.getElementById("login-form");
 
@@ -141,14 +131,14 @@ if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/
     const { strID, strPassword } = loginView.getUserInput();
     let loginStatus = false;
     try {
-      loginStatus = await loginController.login(strID, strPassword);
+      loginStatus = await account.login(strID, strPassword);
     } catch (error) {
       loginView.displayError("Unable to save account details.");
       return;
     }
 
     if (loginStatus) {
-      sessionStorage.setItem("uaLoggedIn", "true");
+      sessionStorage.setItem(LOGIN_SESSION_KEY, "true");
       window.location.href = "./dashboard.html";
       return;
     }
@@ -158,7 +148,7 @@ if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/
 }
 
 if (pathname.endsWith("/dashboard.html")) {
-  if (sessionStorage.getItem("uaLoggedIn") !== "true") {
+  if (sessionStorage.getItem(LOGIN_SESSION_KEY) !== "true") {
     window.location.href = "./login.html";
   }
 }
