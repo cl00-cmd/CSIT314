@@ -8,6 +8,20 @@ class Account {
   verifyLogin(strID, strPassword) {
     return this.userID === strID && this.password === strPassword;
   }
+
+  async login(strID, strPassword) {
+    const isValid = this.verifyLogin(strID, strPassword);
+    if (!isValid) {
+      return false;
+    }
+
+    await saveAccount(this);
+    return true;
+  }
+
+  logout() {
+    sessionStorage.removeItem("uaLoggedIn");
+  }
 }
 
 const DB_NAME = "UAAuthDB";
@@ -85,21 +99,17 @@ async function saveAccount(account) {
   });
 }
 
-class loginUAC {
+class LoginController {
   constructor(account) {
     this.account = account;
   }
 
-  login(strID, strPassword) {
-    return this.account.verifyLogin(strID, strPassword);
+  async login(strID, strPassword) {
+    return this.account.login(strID, strPassword);
   }
 }
 
-class loginUA {
-  constructor(controller) {
-    this.controller = controller;
-  }
-
+class LoginView {
   getUserInput() {
     const idInput = document.getElementById("userId");
     const passwordInput = document.getElementById("password");
@@ -117,39 +127,33 @@ class loginUA {
   }
 }
 
-class logoutUA {
-  logout() {
-    sessionStorage.removeItem("uaLoggedIn");
-  }
-}
-
 const pathname = window.location.pathname;
-const uaAccount = new Account("ua", "admin123", "ua@example.com");
+const account = new Account("ua", "admin123", "ua@example.com");
 
 if (pathname.endsWith("/login.html") || pathname === "/" || pathname.endsWith("/CSIT314/")) {
-  const loginController = new loginUAC(uaAccount);
-  const loginBoundary = new loginUA(loginController);
+  const loginController = new LoginController(account);
+  const loginView = new LoginView();
   const form = document.getElementById("login-form");
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const { strID, strPassword } = loginBoundary.getUserInput();
-    const loginStatus = loginController.login(strID, strPassword);
+    const { strID, strPassword } = loginView.getUserInput();
+    let loginStatus = false;
+    try {
+      loginStatus = await loginController.login(strID, strPassword);
+    } catch (error) {
+      loginView.displayError("Unable to save account details.");
+      return;
+    }
 
     if (loginStatus) {
-      try {
-        await saveAccount(uaAccount);
-      } catch (error) {
-        loginBoundary.displayError("Unable to save account details.");
-        return;
-      }
       sessionStorage.setItem("uaLoggedIn", "true");
       window.location.href = "./dashboard.html";
       return;
     }
 
-    loginBoundary.displayError("Invalid User ID or Password");
+    loginView.displayError("Invalid User ID or Password");
   });
 }
 
@@ -160,6 +164,5 @@ if (pathname.endsWith("/dashboard.html")) {
 }
 
 if (pathname.endsWith("/logout.html")) {
-  const logoutBoundary = new logoutUA();
-  logoutBoundary.logout();
+  account.logout();
 }

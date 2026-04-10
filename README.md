@@ -2,6 +2,7 @@
 
 Simple UA (User Admin) login/logout prototype based on BCE and sequence flow.
 On successful login, account details are stored in browser IndexedDB in an `Account` store with `ID`, `Password` (PBKDF2 hash string), and `Email` fields.
+Login and logout behavior is exposed through reusable methods on the `Account` class.
 
 ## Pages
 
