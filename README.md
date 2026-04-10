@@ -1,25 +1,36 @@
 # CSIT314
 
-Simple UA (User Admin) login/logout prototype based on BCE and sequence flow.
-Authentication now uses a SQL database (SQLite) with an `Account` table.
-Login and logout behavior is exposed through reusable methods on the `Account` class.
+Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend and a Python backend.
 
-## Pages
+## Features
 
-- `login.html` - UA enters ID and password
-- `dashboard.html` - blank dashboard with `Welcome User Admin`
-- `logout.html` - logout page that clears session and returns to login
+- Login form (`login.html`) sends credentials to `POST /api/login`
+- Credentials are verified against an SQLite `Account` table
+- Passwords are stored as PBKDF2-SHA256 hashes with per-user salts
+- Dashboard access (`dashboard.html`) is protected by `sessionStorage`
+- Logout page (`logout.html`) clears the login session
+
+## Project files
+
+- `server.py` - HTTP server and login API
+- `scripts/auth.js` - frontend login/logout flow and dashboard guard
+- `database/account.db` - SQLite database (auto-created at runtime)
+- `login.html`, `dashboard.html`, `logout.html`, `styles.css` - UI
 
 ## Run
 
-1. Start the server:
-   - `cd <your-local-path>/CSIT314`
+1. Start the server from the project root:
    - Windows: `py server.py`
    - macOS/Linux: `python3 server.py`
-2. Open:
+2. Open in your browser:
    - `http://127.0.0.1:8000/login.html`
 
-The server creates `database/account.db` automatically (ignored in git) and ensures the `Account` table exists.
+The server automatically creates `database/account.db`, ensures the `Account` table exists, and seeds default accounts if missing.
+
+## Configuration
+
+- `CSIT314_HOST` (default: `127.0.0.1`)
+- `CSIT314_PORT` (default: `8000`)
 
 ## Demo credentials
 
