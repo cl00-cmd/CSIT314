@@ -6,6 +6,7 @@ Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend
 
 - Login form (`login.html`) sends credentials to `POST /api/login`
 - Credentials are verified against an SQLite `Account` table
+- Accounts include a `Role` field so different user types can be identified
 - Passwords are stored as PBKDF2-SHA256 hashes with per-user salts
 - Dashboard access (`dashboard.html`) is protected by `sessionStorage`
 - Logout page (`logout.html`) clears the login session
@@ -38,7 +39,9 @@ The server automatically creates `database/account.db`, ensures the `Account` ta
   - User ID: `ua`
   - Password: `admin123`
   - Email: `ua@example.com`
+  - Role: `user_admin`
 - Account 2
   - User ID: `UATest1`
   - Password: `1234`
   - Email: `uatest1@example.com`
+  - Role: `user`

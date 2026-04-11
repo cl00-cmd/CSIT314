@@ -15,15 +15,21 @@ class Account {
     }
 
     const payload = await response.json();
-    return payload?.success === true;
+    if (payload?.success !== true || !payload?.account) {
+      return null;
+    }
+
+    return payload.account;
   }
 
   logout() {
     sessionStorage.removeItem(LOGIN_SESSION_KEY);
+    sessionStorage.removeItem(LOGIN_ACCOUNT_KEY);
   }
 }
 
 const LOGIN_SESSION_KEY = "accountLoggedIn";
+const LOGIN_ACCOUNT_KEY = "accountDetails";
 
 class LoginView {
   getUserInput() {
@@ -55,16 +61,17 @@ if (pathname.endsWith("/login.html") || pathname === "/") {
     event.preventDefault();
 
     const { strID, strPassword } = loginView.getUserInput();
-    let loginStatus = false;
+    let accountDetails = null;
     try {
-      loginStatus = await account.login(strID, strPassword);
+      accountDetails = await account.login(strID, strPassword);
     } catch (error) {
       loginView.displayError("Unable to connect to authentication server.");
       return;
     }
 
-    if (loginStatus) {
+    if (accountDetails) {
       sessionStorage.setItem(LOGIN_SESSION_KEY, "true");
+      sessionStorage.setItem(LOGIN_ACCOUNT_KEY, JSON.stringify(accountDetails));
       window.location.href = "./dashboard.html";
       return;
     }
@@ -76,6 +83,18 @@ if (pathname.endsWith("/login.html") || pathname === "/") {
 if (pathname.endsWith("/dashboard.html")) {
   if (sessionStorage.getItem(LOGIN_SESSION_KEY) !== "true") {
     window.location.href = "./login.html";
+  } else {
+    const accountDetails = JSON.parse(sessionStorage.getItem(LOGIN_ACCOUNT_KEY) || "null");
+    const heading = document.getElementById("dashboard-title");
+    const roleTag = document.getElementById("role-tag");
+
+    if (heading && accountDetails?.id) {
+      heading.textContent = `Welcome ${accountDetails.id}`;
+    }
+
+    if (roleTag && accountDetails?.role) {
+      roleTag.textContent = `Role: ${accountDetails.role}`;
+    }
   }
 }
 

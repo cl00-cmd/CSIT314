@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path("database") / "account.db"
 PBKDF2_ITERATIONS = 100000
 DEFAULT_ACCOUNTS = (
-  ("ua", "admin123", "ua@example.com"),
-  ("UATest1", "1234", "uatest1@example.com"),
+  ("ua", "admin123", "ua@example.com", "user_admin"),
+  ("UATest1", "1234", "uatest1@example.com", "user"),
 )
 
 
@@ -37,24 +37,48 @@ def ensure_database() -> None:
         PasswordHash VARCHAR(64) NOT NULL,
         Salt VARCHAR(32) NOT NULL,
         Iterations INTEGER NOT NULL,
-        Email VARCHAR(255) NOT NULL
+        Email VARCHAR(255) NOT NULL,
+        Role VARCHAR(50) NOT NULL DEFAULT 'user'
       )
       """
     )
 
-    for user_id, password, email in DEFAULT_ACCOUNTS:
+    columns = {
+      row[1]
+      for row in connection.execute("PRAGMA table_info(Account)").fetchall()
+    }
+    if "Role" not in columns:
+      connection.execute(
+        "ALTER TABLE Account ADD COLUMN Role VARCHAR(50) NOT NULL DEFAULT 'user'"
+      )
+      connection.execute(
+        """
+        UPDATE Account
+        SET Role = CASE
+          WHEN ID = 'ua' THEN 'user_admin'
+          ELSE 'user'
+        END
+        WHERE Role IS NULL OR TRIM(Role) = ''
+        """
+      )
+
+    for user_id, password, email, role in DEFAULT_ACCOUNTS:
       existing = connection.execute("SELECT 1 FROM Account WHERE ID = ?", (user_id,)).fetchone()
       if existing is not None:
+        connection.execute(
+          "UPDATE Account SET Email = ?, Role = ? WHERE ID = ?",
+          (email, role, user_id),
+        )
         continue
 
       salt = os.urandom(16)
       password_hash = hash_password(password, salt, PBKDF2_ITERATIONS)
       connection.execute(
         """
-        INSERT INTO Account (ID, PasswordHash, Salt, Iterations, Email)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Account (ID, PasswordHash, Salt, Iterations, Email, Role)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (user_id, password_hash, salt.hex(), PBKDF2_ITERATIONS, email),
+        (user_id, password_hash, salt.hex(), PBKDF2_ITERATIONS, email, role),
       )
 
     connection.commit()
@@ -62,22 +86,29 @@ def ensure_database() -> None:
     connection.close()
 
 
-def verify_credentials(user_id: str, password: str) -> bool:
+def verify_credentials(user_id: str, password: str) -> dict | None:
   connection = connect_database()
   try:
     row = connection.execute(
-      "SELECT PasswordHash, Salt, Iterations FROM Account WHERE ID = ?",
+      "SELECT ID, PasswordHash, Salt, Iterations, Email, Role FROM Account WHERE ID = ?",
       (user_id,),
     ).fetchone()
   finally:
     connection.close()
 
   if row is None:
-    return False
+    return None
 
-  stored_hash, salt_hex, iterations = row
+  stored_id, stored_hash, salt_hex, iterations, email, role = row
   computed_hash = hash_password(password, bytes.fromhex(salt_hex), int(iterations))
-  return hmac.compare_digest(stored_hash, computed_hash)
+  if not hmac.compare_digest(stored_hash, computed_hash):
+    return None
+
+  return {
+    "id": stored_id,
+    "email": email,
+    "role": role,
+  }
 
 
 class RequestHandler(SimpleHTTPRequestHandler):
@@ -101,8 +132,9 @@ class RequestHandler(SimpleHTTPRequestHandler):
       self._send_json(400, {"success": False, "message": "Missing credentials"})
       return
 
-    if verify_credentials(user_id, password):
-      self._send_json(200, {"success": True})
+    account = verify_credentials(user_id, password)
+    if account is not None:
+      self._send_json(200, {"success": True, "account": account})
       return
 
     self._send_json(401, {"success": False, "message": "Invalid credentials"})
