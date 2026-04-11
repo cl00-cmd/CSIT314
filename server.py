@@ -2,19 +2,54 @@ import hashlib
 import hmac
 import json
 import os
-import sqlite3
+from dataclasses import dataclass
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+try:
+  import pymysql
+  from pymysql.connections import Connection
+except ModuleNotFoundError:
+  pymysql = None
+  Connection = object
+
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = Path("database") / "account.db"
 PBKDF2_ITERATIONS = 100000
 DEFAULT_ACCOUNTS = (
   ("ua", "admin123", "ua@example.com", "user_admin"),
-  ("UATest1", "1234", "uatest1@example.com", "user"),
+  ("UATest1", "1234", "uatest1@example.com", "user_admin"),
 )
 ALLOWED_ROLES = {"user", "user_admin"}
+CREATE_ACCOUNT_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS Account (
+  ID VARCHAR(50) PRIMARY KEY,
+  PasswordHash VARCHAR(64) NOT NULL,
+  Salt VARCHAR(32) NOT NULL,
+  Iterations INT NOT NULL,
+  Email VARCHAR(255) NOT NULL,
+  Role VARCHAR(50) NOT NULL DEFAULT 'user'
+)
+"""
+
+
+@dataclass(frozen=True)
+class DatabaseConfig:
+  host: str
+  port: int
+  user: str
+  password: str
+  database: str
+
+
+def get_database_config() -> DatabaseConfig:
+  return DatabaseConfig(
+    host=os.environ.get("DB_HOST", "127.0.0.1"),
+    port=int(os.environ.get("DB_PORT", "3306")),
+    user=os.environ.get("DB_USER", "root"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    database=os.environ.get("DB_NAME", "csit314"),
+  )
 
 
 class Account:
@@ -62,50 +97,44 @@ class Account:
 
 
 class AccountRepository:
-  def __init__(self, database_path: Path) -> None:
-    self.database_path = database_path
+  def __init__(self, config: DatabaseConfig) -> None:
+    self.config = config
 
-  def connect(self) -> sqlite3.Connection:
-    self.database_path.parent.mkdir(exist_ok=True)
-    connection = sqlite3.connect(f"file:{self.database_path.as_posix()}?nolock=1", uri=True)
-    connection.execute("PRAGMA journal_mode=MEMORY")
-    return connection
-
-  def ensure_schema(self) -> None:
-    connection = self.connect()
-    try:
-      connection.execute(
-        """
-        CREATE TABLE IF NOT EXISTS Account (
-          ID VARCHAR(50) PRIMARY KEY,
-          PasswordHash VARCHAR(64) NOT NULL,
-          Salt VARCHAR(32) NOT NULL,
-          Iterations INTEGER NOT NULL,
-          Email VARCHAR(255) NOT NULL,
-          Role VARCHAR(50) NOT NULL DEFAULT 'user'
-        )
-        """
+  def _require_driver(self) -> None:
+    if pymysql is None:
+      raise RuntimeError(
+        "PyMySQL is not installed. Run `py -m pip install pymysql` before starting the server."
       )
 
-      columns = {
-        row[1]
-        for row in connection.execute("PRAGMA table_info(Account)").fetchall()
-      }
-      if "Role" not in columns:
-        connection.execute(
-          "ALTER TABLE Account ADD COLUMN Role VARCHAR(50) NOT NULL DEFAULT 'user'"
-        )
-        connection.execute(
-          """
-          UPDATE Account
-          SET Role = CASE
-            WHEN ID = 'ua' THEN 'user_admin'
-            ELSE 'user'
-          END
-          WHERE Role IS NULL OR TRIM(Role) = ''
-          """
-        )
+  def connect(self, include_database: bool = True) -> Connection:
+    self._require_driver()
+    connection_kwargs = {
+      "host": self.config.host,
+      "port": self.config.port,
+      "user": self.config.user,
+      "password": self.config.password,
+      "charset": "utf8mb4",
+      "cursorclass": pymysql.cursors.Cursor,
+      "autocommit": False,
+    }
+    if include_database:
+      connection_kwargs["database"] = self.config.database
 
+    return pymysql.connect(**connection_kwargs)
+
+  def ensure_schema(self) -> None:
+    connection = self.connect(include_database=False)
+    try:
+      with connection.cursor() as cursor:
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{self.config.database}`")
+      connection.commit()
+    finally:
+      connection.close()
+
+    connection = self.connect(include_database=True)
+    try:
+      with connection.cursor() as cursor:
+        cursor.execute(CREATE_ACCOUNT_TABLE_SQL)
       connection.commit()
     finally:
       connection.close()
@@ -113,10 +142,16 @@ class AccountRepository:
   def get_by_id(self, user_id: str) -> Account | None:
     connection = self.connect()
     try:
-      row = connection.execute(
-        "SELECT ID, PasswordHash, Salt, Iterations, Email, Role FROM Account WHERE ID = ?",
-        (user_id,),
-      ).fetchone()
+      with connection.cursor() as cursor:
+        cursor.execute(
+          """
+          SELECT ID, PasswordHash, Salt, Iterations, Email, Role
+          FROM Account
+          WHERE ID = %s
+          """,
+          (user_id,),
+        )
+        row = cursor.fetchone()
     finally:
       connection.close()
 
@@ -138,20 +173,33 @@ class AccountRepository:
 
     connection = self.connect()
     try:
-      connection.execute(
-        """
-        INSERT INTO Account (ID, PasswordHash, Salt, Iterations, Email, Role)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-          account.user_id,
-          account.password_hash,
-          account.salt_hex,
-          account.iterations,
-          account.email,
-          account.role,
-        ),
-      )
+      with connection.cursor() as cursor:
+        cursor.execute(
+          """
+          INSERT INTO Account (ID, PasswordHash, Salt, Iterations, Email, Role)
+          VALUES (%s, %s, %s, %s, %s, %s)
+          """,
+          (
+            account.user_id,
+            account.password_hash,
+            account.salt_hex,
+            account.iterations,
+            account.email,
+            account.role,
+          ),
+        )
+      connection.commit()
+    finally:
+      connection.close()
+
+  def update_seed_account(self, user_id: str, email: str, role: str) -> None:
+    connection = self.connect()
+    try:
+      with connection.cursor() as cursor:
+        cursor.execute(
+          "UPDATE Account SET Email = %s, Role = %s WHERE ID = %s",
+          (email, role, user_id),
+        )
       connection.commit()
     finally:
       connection.close()
@@ -160,15 +208,7 @@ class AccountRepository:
     for user_id, password, email, role in accounts:
       existing = self.get_by_id(user_id)
       if existing is not None:
-        connection = self.connect()
-        try:
-          connection.execute(
-            "UPDATE Account SET Email = ?, Role = ? WHERE ID = ?",
-            (email, role, user_id),
-          )
-          connection.commit()
-        finally:
-          connection.close()
+        self.update_seed_account(user_id, email, role)
         continue
 
       account = Account(user_id=user_id, email=email, role=role)
@@ -206,15 +246,11 @@ class UACreateAccountC:
     return account.saveAccount(self.repository)
 
 
-ACCOUNT_REPOSITORY = AccountRepository(DB_PATH)
+ACCOUNT_REPOSITORY = AccountRepository(get_database_config())
 
 
 def hash_password(password: str, salt: bytes, iterations: int) -> str:
   return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations).hex()
-
-
-def connect_database() -> sqlite3.Connection:
-  return ACCOUNT_REPOSITORY.connect()
 
 
 def ensure_database() -> None:
@@ -287,7 +323,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
     except PermissionError as error:
       self._send_json(403, {"success": False, "message": str(error)})
       return
-    except ValueError as error:
+    except (RuntimeError, ValueError, pymysql.MySQLError if pymysql else Exception) as error:
       self._send_json(400, {"success": False, "message": str(error)})
       return
 
