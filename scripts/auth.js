@@ -77,6 +77,10 @@ class LoginView {
 }
 
 class UACreateAccount {
+  async createAccount(createAccountControl, actorAccount) {
+    return createAccountControl.saveAccount(actorAccount);
+  }
+
   getNewAccountDetails() {
     const idInput = document.getElementById("newUserId");
     const emailInput = document.getElementById("newEmail");
@@ -127,7 +131,7 @@ class UACreateAccountC {
     this.createAccountView = createAccountView;
   }
 
-  async createAccount(actorAccount) {
+  async saveAccount(actorAccount) {
     const newAccountDetails = this.createAccountView.getNewAccountDetails();
     const result = await this.account.saveAccount(actorAccount.id, newAccountDetails);
     this.createAccountView.displayMessage(result.message, result.success);
@@ -195,7 +199,7 @@ if (pathname.endsWith("/dashboard.html")) {
         event.preventDefault();
 
         try {
-          await createAccountControl.createAccount(accountDetails);
+          await createAccountView.createAccount(createAccountControl, accountDetails);
         } catch (error) {
           createAccountView.displayMessage("Unable to create account");
         }

@@ -56,7 +56,7 @@ class Account:
       "role": self.role,
     }
 
-  def save_account(self, repository: "AccountRepository") -> bool:
+  def saveAccount(self, repository: "AccountRepository") -> bool:
     repository.save(self)
     return True
 
@@ -180,7 +180,7 @@ class UACreateAccountC:
   def __init__(self, repository: AccountRepository) -> None:
     self.repository = repository
 
-  def save_account(
+  def saveAccount(
     self,
     actor_id: str,
     user_id: str,
@@ -203,7 +203,7 @@ class UACreateAccountC:
 
     account = Account(user_id=user_id, email=email, role=role)
     account.set_password(password)
-    return account.save_account(self.repository)
+    return account.saveAccount(self.repository)
 
 
 ACCOUNT_REPOSITORY = AccountRepository(DB_PATH)
@@ -283,7 +283,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
     role = str(payload.get("role", "user")).strip() or "user"
 
     try:
-      creation_status = control.save_account(actor_id, user_id, email, password, role)
+      creation_status = control.saveAccount(actor_id, user_id, email, password, role)
     except PermissionError as error:
       self._send_json(403, {"success": False, "message": str(error)})
       return
