@@ -9,7 +9,7 @@ body {
 }
 
 .container {
-  max-width: 420px;
+  max-width: 520px;
   margin: 80px auto;
   background: #fff;
   padding: 24px;
@@ -27,6 +27,7 @@ form {
 }
 
 input,
+select,
 button,
 .button-link {
   padding: 10px 12px;
@@ -34,7 +35,8 @@ button,
   font-size: 14px;
 }
 
-input {
+input,
+select {
   border: 1px solid #ccc;
 }
 
@@ -53,4 +55,14 @@ button,
   min-height: 20px;
   margin: 0;
   color: #b00020;
+}
+
+.message[data-state="success"] {
+  color: #0a7a33;
+}
+
+#create-account-section {
+  margin: 24px 0;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
 }

@@ -10,6 +10,28 @@
     <main class="container">
       <h1 id="dashboard-title">Welcome User</h1>
       <p id="role-tag">Role: user</p>
+      <section id="create-account-section" hidden>
+        <h2>Create Accounts</h2>
+        <form id="create-account-form">
+          <label for="newUserId">New User ID</label>
+          <input id="newUserId" name="newUserId" type="text" required />
+
+          <label for="newEmail">Email</label>
+          <input id="newEmail" name="newEmail" type="email" required />
+
+          <label for="newPassword">Password</label>
+          <input id="newPassword" name="newPassword" type="password" required />
+
+          <label for="newRole">Role</label>
+          <select id="newRole" name="newRole">
+            <option value="user" selected>User</option>
+            <option value="user_admin">User Admin</option>
+          </select>
+
+          <button type="submit">Create Account</button>
+          <p id="create-account-message" class="message" aria-live="polite"></p>
+        </form>
+      </section>
       <a href="./logout.html" class="button-link">Logout</a>
     </main>
     <script src="./scripts/auth.js"></script>

@@ -10,6 +10,7 @@ Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend
 - Passwords are stored as PBKDF2-SHA256 hashes with per-user salts
 - Dashboard access (`dashboard.html`) is protected by `sessionStorage`
 - Logout page (`logout.html`) clears the login session
+- User Admin accounts can create new user accounts from the dashboard
 
 ## Project files
 

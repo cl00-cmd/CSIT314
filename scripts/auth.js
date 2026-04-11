@@ -22,6 +22,33 @@ class Account {
     return payload.account;
   }
 
+  async saveAccount(actorId, accountDetails) {
+    const response = await fetch("/api/accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        actorId,
+        id: accountDetails.id,
+        email: accountDetails.email,
+        password: accountDetails.password,
+        role: accountDetails.role,
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      return {
+        success: false,
+        message: payload?.message || "Unable to create account",
+      };
+    }
+
+    return {
+      success: payload?.success === true,
+      message: payload?.message || "Account Created",
+    };
+  }
+
   logout() {
     sessionStorage.removeItem(LOGIN_SESSION_KEY);
     sessionStorage.removeItem(LOGIN_ACCOUNT_KEY);
@@ -45,6 +72,68 @@ class LoginView {
     const messageElement = document.getElementById("message");
     if (messageElement) {
       messageElement.textContent = message;
+    }
+  }
+}
+
+class UACreateAccount {
+  getNewAccountDetails() {
+    const idInput = document.getElementById("newUserId");
+    const emailInput = document.getElementById("newEmail");
+    const passwordInput = document.getElementById("newPassword");
+    const roleInput = document.getElementById("newRole");
+
+    return {
+      id: (idInput?.value || "").trim(),
+      email: (emailInput?.value || "").trim(),
+      password: passwordInput?.value || "",
+      role: (roleInput?.value || "user").trim(),
+    };
+  }
+
+  displayMessage(message, isSuccess = false) {
+    const messageElement = document.getElementById("create-account-message");
+    if (!messageElement) {
+      return;
+    }
+
+    messageElement.textContent = message;
+    messageElement.dataset.state = isSuccess ? "success" : "error";
+  }
+
+  showSection() {
+    const section = document.getElementById("create-account-section");
+    if (section) {
+      section.hidden = false;
+    }
+  }
+
+  hideSection() {
+    const section = document.getElementById("create-account-section");
+    if (section) {
+      section.hidden = true;
+    }
+  }
+
+  resetForm() {
+    const form = document.getElementById("create-account-form");
+    form?.reset();
+  }
+}
+
+class UACreateAccountC {
+  constructor(account, createAccountView) {
+    this.account = account;
+    this.createAccountView = createAccountView;
+  }
+
+  async createAccount(actorAccount) {
+    const newAccountDetails = this.createAccountView.getNewAccountDetails();
+    const result = await this.account.saveAccount(actorAccount.id, newAccountDetails);
+    this.createAccountView.displayMessage(result.message, result.success);
+
+    if (result.success) {
+      this.createAccountView.resetForm();
     }
   }
 }
@@ -94,6 +183,25 @@ if (pathname.endsWith("/dashboard.html")) {
 
     if (roleTag && accountDetails?.role) {
       roleTag.textContent = `Role: ${accountDetails.role}`;
+    }
+
+    const createAccountView = new UACreateAccount();
+    if (accountDetails?.role === "user_admin") {
+      createAccountView.showSection();
+      const createAccountControl = new UACreateAccountC(account, createAccountView);
+      const createAccountForm = document.getElementById("create-account-form");
+
+      createAccountForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await createAccountControl.createAccount(accountDetails);
+        } catch (error) {
+          createAccountView.displayMessage("Unable to create account");
+        }
+      });
+    } else {
+      createAccountView.hideSection();
     }
   }
 }
