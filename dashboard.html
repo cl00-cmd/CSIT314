@@ -7,32 +7,57 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="container">
-      <h1 id="dashboard-title">Welcome User</h1>
-      <p id="role-tag">Role: user</p>
-      <section id="create-account-section" hidden>
-        <h2>Create Accounts</h2>
-        <form id="create-account-form">
-          <label for="newUserId">New User ID</label>
-          <input id="newUserId" name="newUserId" type="text" required />
+    <main class="dashboard-shell">
+      <section class="page-card page-card--hero">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">Admin Dashboard</p>
+            <h1 id="dashboard-title">Welcome User</h1>
+            <p class="subtitle">Manage accounts from a cleaner dashboard with a simpler, more polished layout.</p>
+          </div>
+          <p id="role-tag" class="role-pill">Role: user</p>
+        </div>
 
-          <label for="newEmail">Email</label>
-          <input id="newEmail" name="newEmail" type="email" required />
+        <div class="action-row">
+          <a href="./logout.html" class="button-link button-link--secondary">Logout</a>
+        </div>
+      </section>
 
-          <label for="newPassword">Password</label>
-          <input id="newPassword" name="newPassword" type="password" required />
+      <section id="create-account-section" class="page-card" hidden>
+        <div class="section-heading">
+          <p class="eyebrow">Account Setup</p>
+          <h2>Create New Accounts</h2>
+          <p class="subtitle">Add a new user and assign the right role using a clearer form.</p>
+        </div>
 
-          <label for="newRole">Role</label>
-          <select id="newRole" name="newRole">
-            <option value="user" selected>User</option>
-            <option value="user_admin">User Admin</option>
-          </select>
+        <form id="create-account-form" class="form-grid">
+          <div class="field">
+            <label for="newUserId">New User ID</label>
+            <input id="newUserId" name="newUserId" type="text" placeholder="e.g. alex01" required />
+          </div>
+
+          <div class="field">
+            <label for="newEmail">Email</label>
+            <input id="newEmail" name="newEmail" type="email" placeholder="name@example.com" required />
+          </div>
+
+          <div class="field">
+            <label for="newPassword">Password</label>
+            <input id="newPassword" name="newPassword" type="password" placeholder="Create a password" required />
+          </div>
+
+          <div class="field">
+            <label for="newRole">Role</label>
+            <select id="newRole" name="newRole">
+              <option value="user" selected>User</option>
+              <option value="user_admin">User Admin</option>
+            </select>
+          </div>
 
           <button type="submit">Create Account</button>
           <p id="create-account-message" class="message" aria-live="polite"></p>
         </form>
       </section>
-      <a href="./logout.html" class="button-link">Logout</a>
     </main>
     <script src="./scripts/auth.js"></script>
   </body>
