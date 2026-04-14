@@ -145,6 +145,18 @@ class UACreateAccountC {
 const pathname = window.location.pathname;
 const account = new Account();
 
+function formatRoleLabel(role) {
+  const roleLabels = {
+    user: "Donor",
+    donor: "Donor",
+    user_admin: "User Admin",
+    platform_manager: "Platform Manager",
+    fund_raiser: "Fund Raiser",
+  };
+
+  return roleLabels[role] || role || "User";
+}
+
 // Login flow (login page handling)
 if (pathname.endsWith("/login.html") || pathname === "/") {
   const loginView = new LoginView();
@@ -180,13 +192,18 @@ if (pathname.endsWith("/dashboard.html")) {
     const accountDetails = JSON.parse(sessionStorage.getItem(LOGIN_ACCOUNT_KEY) || "null");
     const heading = document.getElementById("dashboard-title");
     const roleTag = document.getElementById("role-tag");
+    const dashboardContext = document.getElementById("dashboard-context");
 
-    if (heading && accountDetails?.id) {
-      heading.textContent = `Welcome ${accountDetails.id}`;
+    if (heading && accountDetails?.role) {
+      heading.textContent = `${formatRoleLabel(accountDetails.role)} Dashboard`;
     }
 
     if (roleTag && accountDetails?.role) {
-      roleTag.textContent = `Role: ${accountDetails.role}`;
+      roleTag.textContent = `Role: ${formatRoleLabel(accountDetails.role)}`;
+    }
+
+    if (dashboardContext && accountDetails?.id) {
+      dashboardContext.textContent = `Signed in as ${accountDetails.id}. Manage account setup, profiles, and role access from this panel.`;
     }
 
     const createAccountView = new UACreateAccount();

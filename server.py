@@ -19,8 +19,11 @@ PBKDF2_ITERATIONS = 100000
 DEFAULT_ACCOUNTS = (
   ("ua", "admin123", "ua@example.com", "user_admin"),
   ("UATest1", "1234", "uatest1@example.com", "user_admin"),
+  ("donor01", "1234", "donor01@example.com", "donor"),
+  ("pm01", "1234", "pm01@example.com", "platform_manager"),
+  ("fr01", "1234", "fr01@example.com", "fund_raiser"),
 )
-ALLOWED_ROLES = {"user", "user_admin"}
+ALLOWED_ROLES = {"user", "donor", "user_admin", "platform_manager", "fund_raiser"}
 CREATE_ACCOUNT_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS Account (
   ID VARCHAR(50) PRIMARY KEY,
