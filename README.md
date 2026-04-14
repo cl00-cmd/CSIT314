@@ -20,7 +20,7 @@ Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend
 - `login.html`, `dashboard.html`, `logout.html`, `styles.css` - UI
 
 ## Run
-
+Prerequisite: Open Powershell
 1. Install the Python dependency:
    - Windows: `py -m pip install -r requirements.txt`
    - macOS/Linux: `python3 -m pip install -r requirements.txt`
