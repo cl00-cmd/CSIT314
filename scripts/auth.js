@@ -1,9 +1,9 @@
 class Account {
-  async login(strID, strPassword) {
+  async login(strUserID, strPassword) {
     const response = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: strID, password: strPassword }),
+      body: JSON.stringify({ id: strUserID, password: strPassword }),
     });
 
     if (response.status === 401) {
@@ -63,7 +63,7 @@ class LoginView {
     const idInput = document.getElementById("userId");
     const passwordInput = document.getElementById("password");
     return {
-      strID: (idInput?.value || "").trim(),
+      strUserID: (idInput?.value || "").trim(),
       strPassword: passwordInput?.value || "",
     };
   }
@@ -165,10 +165,10 @@ if (pathname.endsWith("/login.html") || pathname === "/") {
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const { strID, strPassword } = loginView.getUserInput();
+    const { strUserID, strPassword } = loginView.getUserInput();
     let accountDetails = null;
     try {
-      accountDetails = await account.login(strID, strPassword);
+      accountDetails = await account.login(strUserID, strPassword);
     } catch (error) {
       loginView.displayError("Unable to connect to authentication server.");
       return;

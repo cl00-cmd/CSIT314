@@ -80,7 +80,7 @@ class Account:
     self.salt_hex = salt.hex()
     self.password_hash = hash_password(password, salt, self.iterations)
 
-  def verify_password(self, password: str) -> bool:
+  def verifyPassword(self, password: str) -> bool:
     if self.password_hash is None or self.salt_hex is None:
       return False
 
@@ -263,7 +263,7 @@ def ensure_database() -> None:
 
 def verify_credentials(user_id: str, password: str) -> dict | None:
   account = ACCOUNT_REPOSITORY.get_by_id(user_id)
-  if account is None or not account.verify_password(password):
+  if account is None or not account.verifyPassword(password):
     return None
 
   return account.to_response_payload()
