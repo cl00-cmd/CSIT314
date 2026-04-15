@@ -74,7 +74,7 @@ class Account:
     self.salt_hex = salt_hex
     self.iterations = iterations
 
-  def set_password(self, password: str) -> None:
+  def setPassword(self, password: str) -> None:
     salt = os.urandom(16)
     self.password = password
     self.salt_hex = salt.hex()
@@ -215,7 +215,7 @@ class AccountRepository:
         continue
 
       account = Account(user_id=user_id, email=email, role=role)
-      account.set_password(password)
+      account.setPassword(password)
       self.save(account)
 
 
@@ -245,7 +245,7 @@ class UACreateAccountC:
       raise ValueError("Account ID already exists")
 
     account = Account(user_id=user_id, email=email, role=role)
-    account.set_password(password)
+    account.setPassword(password)
     return account.saveAccount(self.repository)
 
 
