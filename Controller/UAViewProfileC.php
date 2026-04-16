@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Profile;
 
-// Control class for viewing one user profile in detail.
+// BCE route:
+// Boundary/UAViewProfile.php calls this Controller.
+// This Controller then calls Entity/Profile.php.
 final class UAViewProfileC
 {
     private Profile $profile;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->profile = new Profile();
     }
 

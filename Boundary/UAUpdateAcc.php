@@ -7,9 +7,12 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UAUpdateAccController;
 use App\Controller\UACreateProfileC;
 
-// Boundary page for loading an account, showing it, and sending edits to the controller.
+// BCE route:
+// Boundary/UAUpdateAcc.php -> Controller/UAUpdateAccController.php -> Entity/Account.php.
+// This page is opened from search/view results, so it stays hidden from the dashboard shortcut list.
 require_login(['user_admin']);
 
+// Boundary -> Controller.
 $controller = new UAUpdateAccController();
 $userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
 $account = $userId > 0 ? $controller->findAccount($userId) : null;

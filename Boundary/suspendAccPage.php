@@ -7,9 +7,14 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\SearchUserController;
 use App\Controller\SuspendAccController;
 
+// BCE routes:
+// Boundary/suspendAccPage.php -> Controller/SearchUserController.php -> Entity/UserAccountEntity.php.
+// Boundary/suspendAccPage.php -> Controller/SuspendAccController.php -> Entity/UserAccountEntity.php.
+// This older generic suspend page searches accounts and updates status through Controllers.
 require_login(['user_admin']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller for account status changes.
     $controller = new SuspendAccController();
     $result = $controller->suspendAccount(
         (int) ($_POST['user_id'] ?? 0),
@@ -19,6 +24,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     app_redirect('suspendAccPage.php');
 }
 
+// Boundary -> Controller for the account list.
 $searchController = new SearchUserController();
 $users = $searchController->searchUser(trim((string) ($_GET['search'] ?? '')));
 ?>

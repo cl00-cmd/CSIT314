@@ -7,20 +7,26 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UpdateUserController;
 use App\Controller\ViewUserDetailsController;
 
+// BCE routes:
+// Boundary/update_usersPg.php -> Controller/ViewUserDetailsController.php -> Entity/UserAccountEntity.php.
+// Boundary/update_usersPg.php -> Controller/UpdateUserController.php -> Entity/UserAccountEntity.php.
+// This older generic update page loads account data and submits edits through Controllers.
 require_login(['user_admin']);
 
+// Boundary -> Controller for loading the current account values.
 $viewController = new ViewUserDetailsController();
 $userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
 $account = $userId > 0 ? $viewController->viewUser($userId) : null;
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller for saving edited account values.
     $controller = new UpdateUserController();
     $result = $controller->updateUser($_POST);
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
     app_redirect('update_usersPg.php', ['id' => (int) ($_POST['user_id'] ?? 0)]);
 }
 
-$roles = ['user_admin', 'fund_raiser', 'donee', 'platform_manager'];
+$roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
 ?>
 <!DOCTYPE html>
 <html lang="en">

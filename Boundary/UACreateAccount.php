@@ -7,7 +7,9 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UACreateAccountC;
 use App\Controller\UACreateProfileC;
 
-// Boundary page for the "create user account" User Admin sequence.
+// BCE route for the main create-account action:
+// Boundary/UACreateAccount.php -> Controller/UACreateAccountC.php -> Entity/Account.php.
+// This Boundary only talks to Controllers; it does not call Entity classes directly.
 require_login(['user_admin']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -19,7 +21,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $profileController = new UACreateProfileC();
-// Use role types from the database so the form stays aligned with configurable profile roles.
+// Boundary -> Controller -> Entity for the role dropdown:
+// Boundary/UACreateAccount.php -> Controller/UACreateProfileC.php -> Entity/Profile.php.
 $profileTypes = $profileController->listProfiles();
 ?>
 <!DOCTYPE html>

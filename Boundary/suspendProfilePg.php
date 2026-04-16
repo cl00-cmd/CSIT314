@@ -7,9 +7,14 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\SearchProfileController;
 use App\Controller\SuspendProfileController;
 
+// BCE routes:
+// Boundary/suspendProfilePg.php -> Controller/SearchProfileController.php -> Entity/UserProfileEntity.php.
+// Boundary/suspendProfilePg.php -> Controller/SuspendProfileController.php -> Entity/UserProfileEntity.php.
+// This older generic suspend page searches profiles and updates status through Controllers.
 require_login(['user_admin']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller for profile status changes.
     $controller = new SuspendProfileController();
     $result = $controller->suspendProfile(
         (int) ($_POST['user_id'] ?? 0),
@@ -19,6 +24,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     app_redirect('suspendProfilePg.php');
 }
 
+// Boundary -> Controller for the profile list.
 $searchController = new SearchProfileController();
 $profiles = $searchController->searchProfile(trim((string) ($_GET['search'] ?? '')));
 ?>

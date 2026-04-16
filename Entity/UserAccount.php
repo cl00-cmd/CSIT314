@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-// BCE entity used by the suspend-account sequence where the admin updates account access.
+// Entity layer for the suspend-account BCE flow:
+// Controller/UserAdminC.php -> Entity/UserAccount.php.
 final class UserAccount
 {
     private UserAccountEntity $accountEntity;

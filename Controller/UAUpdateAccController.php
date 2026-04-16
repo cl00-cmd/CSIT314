@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Account;
 
-// Control class for editing account details such as username, role, and status.
+// BCE route:
+// Boundary/UAUpdateAcc.php calls this Controller.
+// This Controller then calls Entity/Account.php.
 final class UAUpdateAccController
 {
     private Account $account;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->account = new Account();
     }
 
@@ -41,7 +44,7 @@ final class UAUpdateAccController
                 'username' => $username,
                 'full_name' => $fullName,
                 'email' => $email,
-                'role' => (string) ($input['role'] ?? 'donee'),
+                'role' => (string) ($input['role'] ?? 'donor'),
                 'status' => (string) ($input['status'] ?? 'active'),
                 'password_hash' => trim((string) ($input['password'] ?? '')) !== ''
                     ? password_hash((string) $input['password'], PASSWORD_DEFAULT)

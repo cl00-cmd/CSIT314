@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Account;
 
-// Control class for listing or searching user accounts in the admin workflow.
+// BCE route:
+// Boundary/UASearchAcc.php and Boundary/UserAdminPg.php call this Controller.
+// This Controller then calls Entity/Account.php.
 final class UASearchAccController
 {
     private Account $account;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->account = new Account();
     }
 

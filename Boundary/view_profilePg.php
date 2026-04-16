@@ -6,8 +6,12 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\ViewProfileDetailsController;
 
+// BCE route:
+// Boundary/view_profilePg.php -> Controller/ViewProfileDetailsController.php -> Entity/UserProfileEntity.php.
+// This Boundary reads the selected user id and asks the Controller for profile details.
 require_login(['user_admin']);
 
+// Boundary -> Controller.
 $controller = new ViewProfileDetailsController();
 $userId = (int) ($_GET['id'] ?? 0);
 $profile = $userId > 0 ? $controller->viewProfile($userId) : null;

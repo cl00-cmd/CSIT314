@@ -6,9 +6,12 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\UAViewAccC;
 
-// Boundary page for viewing one selected user account.
+// BCE route:
+// Boundary/UAViewAcc.php -> Controller/UAViewAccC.php -> Entity/Account.php.
+// This Boundary reads the selected id and asks the Controller for one account.
 require_login(['user_admin']);
 
+// Boundary -> Controller.
 $controller = new UAViewAccC();
 $userId = (int) ($_GET['id'] ?? 0);
 $account = $userId > 0 ? $controller->findAccount($userId) : null;

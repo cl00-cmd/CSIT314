@@ -5,7 +5,9 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controller\UALoginAccountC;
 
-// Boundary page for the User Admin login sequence.
+// BCE route:
+// Boundary/UALoginAccount.php -> Controller/UALoginAccountC.php -> Entity/Account.php.
+// This Boundary only sends login input to the Controller.
 if (current_user() !== null && (current_user()['role'] ?? '') === 'user_admin') {
     app_redirect('admin_dashboard.php');
 }

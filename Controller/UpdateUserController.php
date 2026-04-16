@@ -5,12 +5,16 @@ namespace App\Controller;
 
 use App\Entity\UserAccountEntity;
 
+// BCE route:
+// Boundary/update_usersPg.php calls this Controller.
+// This Controller calls Entity/UserAccountEntity.php.
 final class UpdateUserController
 {
     private UserAccountEntity $accountEntity;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->accountEntity = new UserAccountEntity();
     }
 
@@ -32,7 +36,7 @@ final class UpdateUserController
                 'username' => $username,
                 'full_name' => $fullName,
                 'email' => $email,
-                'role' => (string) ($input['role'] ?? 'donee'),
+                'role' => (string) ($input['role'] ?? 'donor'),
                 'status' => (string) ($input['status'] ?? 'active'),
                 'password_hash' => trim((string) ($input['password'] ?? '')) !== ''
                     ? password_hash((string) $input['password'], PASSWORD_DEFAULT)

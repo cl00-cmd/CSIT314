@@ -7,13 +7,19 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UpdateProfileController;
 use App\Controller\ViewProfileDetailsController;
 
+// BCE routes:
+// Boundary/update_profilePg.php -> Controller/ViewProfileDetailsController.php -> Entity/UserProfileEntity.php.
+// Boundary/update_profilePg.php -> Controller/UpdateProfileController.php -> Entity/UserProfileEntity.php.
+// This older generic update page loads profile data and submits edits through Controllers.
 require_login(['user_admin']);
 
+// Boundary -> Controller for loading the current profile values.
 $viewController = new ViewProfileDetailsController();
 $userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
 $profile = $userId > 0 ? $viewController->viewProfile($userId) : null;
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller for saving edited profile values.
     $controller = new UpdateProfileController();
     $result = $controller->updateProfile($_POST);
     set_flash($result['success'] ? 'success' : 'error', $result['message']);

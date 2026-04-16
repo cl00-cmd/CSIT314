@@ -6,6 +6,8 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for fundraising activity/campaign data.
+// Called by Controller/FundraiserController.php and Controller/DonorController.php.
 final class CampaignEntity
 {
     private PDO $db;
@@ -176,7 +178,7 @@ final class CampaignEntity
         ]);
     }
 
-    public function getDiscoverableCampaigns(int $doneeUserId, array $filters = []): array
+    public function getDiscoverableCampaigns(int $donorUserId, array $filters = []): array
     {
         $sql = "SELECT c.id, c.title, c.service_type, c.story, c.funding_goal, c.current_amount,
                        c.status, c.start_date, c.end_date, c.created_at,
@@ -189,7 +191,7 @@ final class CampaignEntity
                 INNER JOIN categories cat ON cat.id = c.category_id
                 INNER JOIN users u ON u.id = c.fundraiser_user_id
                 LEFT JOIN favourites fav
-                    ON fav.campaign_id = c.id AND fav.donee_user_id = :donee_user_id
+                    ON fav.campaign_id = c.id AND fav.donor_user_id = :donor_user_id
                 LEFT JOIN (
                     SELECT campaign_id, COUNT(*) AS view_count
                     FROM campaign_views
@@ -202,11 +204,20 @@ final class CampaignEntity
                 ) f ON f.campaign_id = c.id
                 WHERE c.status IN ('active', 'completed')";
 
-        $parameters = ['donee_user_id' => $doneeUserId];
+        $parameters = ['donor_user_id' => $donorUserId];
 
         if (!empty($filters['search'])) {
-            $sql .= ' AND (c.title LIKE :term OR c.story LIKE :term OR c.service_type LIKE :term OR cat.name LIKE :term)';
-            $parameters['term'] = '%' . $filters['search'] . '%';
+            $sql .= ' AND (
+                c.title LIKE :title_term
+                OR c.story LIKE :story_term
+                OR c.service_type LIKE :service_term
+                OR cat.name LIKE :category_term
+            )';
+            $term = '%' . $filters['search'] . '%';
+            $parameters['title_term'] = $term;
+            $parameters['story_term'] = $term;
+            $parameters['service_term'] = $term;
+            $parameters['category_term'] = $term;
         }
         if (!empty($filters['category_id'])) {
             $sql .= ' AND c.category_id = :category_id';
@@ -228,7 +239,7 @@ final class CampaignEntity
         return $statement->fetchAll();
     }
 
-    public function getFavouriteCampaigns(int $doneeUserId): array
+    public function getFavouriteCampaigns(int $donorUserId): array
     {
         $statement = $this->db->prepare(
             "SELECT c.id, c.title, c.service_type, c.funding_goal, c.current_amount, c.status,
@@ -237,15 +248,15 @@ final class CampaignEntity
              INNER JOIN campaigns c ON c.id = f.campaign_id
              INNER JOIN categories cat ON cat.id = c.category_id
              INNER JOIN users u ON u.id = c.fundraiser_user_id
-             WHERE f.donee_user_id = :donee_user_id
+             WHERE f.donor_user_id = :donor_user_id
              ORDER BY f.created_at DESC"
         );
-        $statement->execute(['donee_user_id' => $doneeUserId]);
+        $statement->execute(['donor_user_id' => $donorUserId]);
 
         return $statement->fetchAll();
     }
 
-    public function getCampaignDetails(int $campaignId, int $doneeUserId): ?array
+    public function getCampaignDetails(int $campaignId, int $donorUserId): ?array
     {
         $statement = $this->db->prepare(
             "SELECT c.id, c.title, c.service_type, c.story, c.funding_goal, c.current_amount,
@@ -258,7 +269,7 @@ final class CampaignEntity
              INNER JOIN categories cat ON cat.id = c.category_id
              INNER JOIN users u ON u.id = c.fundraiser_user_id
              LEFT JOIN favourites fav
-                ON fav.campaign_id = c.id AND fav.donee_user_id = :donee_user_id
+                ON fav.campaign_id = c.id AND fav.donor_user_id = :donor_user_id
              LEFT JOIN (
                 SELECT campaign_id, COUNT(*) AS view_count
                 FROM campaign_views
@@ -274,7 +285,7 @@ final class CampaignEntity
         );
         $statement->execute([
             'campaign_id' => $campaignId,
-            'donee_user_id' => $doneeUserId,
+            'donor_user_id' => $donorUserId,
         ]);
 
         return $statement->fetch() ?: null;
@@ -292,29 +303,29 @@ final class CampaignEntity
         ]);
     }
 
-    public function addFavourite(int $doneeUserId, int $campaignId): bool
+    public function addFavourite(int $donorUserId, int $campaignId): bool
     {
         $statement = $this->db->prepare(
-            'INSERT IGNORE INTO favourites (donee_user_id, campaign_id)
-             VALUES (:donee_user_id, :campaign_id)'
+            'INSERT IGNORE INTO favourites (donor_user_id, campaign_id)
+             VALUES (:donor_user_id, :campaign_id)'
         );
 
         return $statement->execute([
-            'donee_user_id' => $doneeUserId,
+            'donor_user_id' => $donorUserId,
             'campaign_id' => $campaignId,
         ]);
     }
 
-    public function removeFavourite(int $doneeUserId, int $campaignId): bool
+    public function removeFavourite(int $donorUserId, int $campaignId): bool
     {
         $statement = $this->db->prepare(
             'DELETE FROM favourites
-             WHERE donee_user_id = :donee_user_id
+             WHERE donor_user_id = :donor_user_id
                AND campaign_id = :campaign_id'
         );
 
         return $statement->execute([
-            'donee_user_id' => $doneeUserId,
+            'donor_user_id' => $donorUserId,
             'campaign_id' => $campaignId,
         ]);
     }

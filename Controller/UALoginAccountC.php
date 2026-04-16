@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Account;
 
-// Control class for the dedicated User Admin login sequence.
+// BCE route:
+// Boundary/UALoginAccount.php calls this Controller.
+// This Controller then calls Entity/Account.php.
 final class UALoginAccountC
 {
     private Account $account;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->account = new Account();
     }
 

@@ -6,9 +6,12 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\UAViewProfileC;
 
-// Boundary page for viewing one selected user profile.
+// BCE route:
+// Boundary/UAViewProfile.php -> Controller/UAViewProfileC.php -> Entity/Profile.php.
+// This Boundary reads the selected id and asks the Controller for one profile.
 require_login(['user_admin']);
 
+// Boundary -> Controller.
 $controller = new UAViewProfileC();
 $userId = (int) ($_GET['id'] ?? 0);
 $profile = $userId > 0 ? $controller->findProfile($userId) : null;

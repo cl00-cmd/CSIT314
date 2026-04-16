@@ -14,12 +14,12 @@ This project is now rebuilt as a PHP `Boundary -> Controller -> Entity` fundrais
 
 ## Assignment Coverage
 
-- Manage different user accounts and profiles for `user_admin`, `fund_raiser`, `donee`, and `platform_manager`.
+- Manage different user accounts and profiles for `user_admin`, `fund_raiser`, `donor`, and `platform_manager`.
 - Fund raisers can create and update fundraising activities.
-- Donees can search, view, favourite, and donate to campaigns.
+- Donors can search, view, favourite, and donate to campaigns.
 - Fund raisers can track campaign views and shortlist counts.
 - Fund raisers can search completed FSA history by service type and date period.
-- Donees can search donation history and see campaign progress by category and date period.
+- Donors can search donation history and see campaign progress by category and date period.
 - Platform managers can manage categories and view daily, weekly, and monthly reports.
 
 ## Run With XAMPP
@@ -42,7 +42,7 @@ If you already ran an older version of this project, run `database/setup.php` ag
 
 - `admin01 / password123`
 - `fr01 / password123`
-- `donee01 / password123`
+- `donor01 / password123`
 - `pm01 / password123`
 
 ## Demo Data

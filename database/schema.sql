@@ -62,12 +62,12 @@ CREATE TABLE IF NOT EXISTS campaigns (
 
 CREATE TABLE IF NOT EXISTS favourites (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    donee_user_id INT NOT NULL,
+    donor_user_id INT NOT NULL,
     campaign_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_favourites_donee FOREIGN KEY (donee_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_favourites_donor FOREIGN KEY (donor_user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_favourites_campaign FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_donee_campaign (donee_user_id, campaign_id),
+    UNIQUE KEY uq_donor_campaign (donor_user_id, campaign_id),
     INDEX idx_favourites_campaign (campaign_id)
 ) ENGINE=InnoDB;
 
@@ -85,12 +85,12 @@ CREATE TABLE IF NOT EXISTS campaign_views (
 CREATE TABLE IF NOT EXISTS donations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     campaign_id INT NOT NULL,
-    donee_user_id INT NOT NULL,
+    donor_user_id INT NOT NULL,
     amount DECIMAL(12, 2) NOT NULL,
     message VARCHAR(255) NOT NULL DEFAULT '',
     donated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_donations_campaign FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
-    CONSTRAINT fk_donations_donee FOREIGN KEY (donee_user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_donations_donee (donee_user_id),
+    CONSTRAINT fk_donations_donor FOREIGN KEY (donor_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_donations_donor (donor_user_id),
     INDEX idx_donations_date (donated_at)
 ) ENGINE=InnoDB;

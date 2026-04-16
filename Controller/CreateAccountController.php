@@ -7,6 +7,9 @@ use App\Config\Database;
 use App\Entity\UserAccountEntity;
 use App\Entity\UserProfileEntity;
 
+// BCE route:
+// Boundary/create_accountPg.php calls this Controller.
+// This Controller calls Entity/UserAccountEntity.php and Entity/UserProfileEntity.php.
 final class CreateAccountController
 {
     private UserAccountEntity $accountEntity;
@@ -14,7 +17,9 @@ final class CreateAccountController
 
     public function __construct()
     {
+        // Controller -> Entity for the users table.
         $this->accountEntity = new UserAccountEntity();
+        // Controller -> Entity for the user_profiles table.
         $this->profileEntity = new UserProfileEntity();
     }
 
@@ -40,7 +45,7 @@ final class CreateAccountController
                 'full_name' => $fullName,
                 'email' => $email,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                'role' => (string) ($input['role'] ?? 'donee'),
+                'role' => (string) ($input['role'] ?? 'donor'),
                 'status' => (string) ($input['account_status'] ?? 'active'),
             ]);
 

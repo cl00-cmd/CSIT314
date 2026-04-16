@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Profile;
 
-// Control class for toggling whether a user profile remains active.
+// BCE route:
+// Boundary/UASuspendProfile.php calls this Controller.
+// This Controller then calls Entity/Profile.php.
 final class UASuspendProfileC
 {
     private Profile $profile;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->profile = new Profile();
     }
 

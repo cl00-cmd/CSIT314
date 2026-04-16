@@ -43,7 +43,7 @@ function role_dashboard_path(string $role): string
     return match ($role) {
         'user_admin' => 'admin_dashboard.php',
         'fund_raiser' => 'fundraiser_dashboard.php',
-        'donee' => 'donee_dashboard.php',
+        'donor' => 'donor_dashboard.php',
         'platform_manager' => 'platform_dashboard.php',
         default => 'login.php',
     };

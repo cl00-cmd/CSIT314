@@ -6,16 +6,21 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\CreateAccountController;
 
+// BCE route:
+// Boundary/create_accountPg.php -> Controller/CreateAccountController.php
+// -> Entity/UserAccountEntity.php and Entity/UserProfileEntity.php.
+// This is the older generic create-account page; the diagram-named page is UACreateAccount.php.
 require_login(['user_admin']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller.
     $controller = new CreateAccountController();
     $result = $controller->createAccount($_POST);
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
     app_redirect('create_accountPg.php');
 }
 
-$roles = ['user_admin', 'fund_raiser', 'donee', 'platform_manager'];
+$roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
 ?>
 <!DOCTYPE html>
 <html lang="en">

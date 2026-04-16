@@ -5,8 +5,13 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controller\FundraiserController;
 
+// BCE route:
+// Boundary/fundraiser_dashboard.php -> Controller/FundraiserController.php
+// -> Entity/CampaignEntity.php and Entity/CategoryEntity.php.
+// This Boundary collects FSA form/filter input and sends it to the Controller.
 require_login(['fund_raiser']);
 
+// Boundary -> Controller.
 $controller = new FundraiserController();
 $user = current_user();
 $userId = (int) $user['id'];

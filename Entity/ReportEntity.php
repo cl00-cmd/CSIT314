@@ -6,6 +6,8 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for platform management reports.
+// Called by Controller/PlatformController.php.
 final class ReportEntity
 {
     private PDO $db;

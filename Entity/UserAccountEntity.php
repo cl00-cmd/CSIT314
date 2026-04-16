@@ -6,6 +6,10 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for user account records in the users table.
+// Called by generic user-admin Controllers such as SearchUserController.php,
+// ViewUserDetailsController.php, UpdateUserController.php, SuspendAccController.php,
+// and CreateAccountController.php.
 final class UserAccountEntity
 {
     private PDO $db;
@@ -24,11 +28,17 @@ final class UserAccountEntity
 
         $parameters = [];
         if ($keyword !== '') {
-            $sql .= ' WHERE u.username LIKE :term
-                      OR u.full_name LIKE :term
-                      OR u.email LIKE :term
-                      OR u.role LIKE :term';
-            $parameters['term'] = '%' . $keyword . '%';
+            $sql .= ' WHERE u.username LIKE :username_term
+                      OR u.full_name LIKE :full_name_term
+                      OR u.email LIKE :email_term
+                      OR u.role LIKE :role_term';
+            $term = '%' . $keyword . '%';
+            $parameters = [
+                'username_term' => $term,
+                'full_name_term' => $term,
+                'email_term' => $term,
+                'role_term' => $term,
+            ];
         }
 
         $sql .= ' ORDER BY u.created_at DESC, u.id DESC';

@@ -6,9 +6,13 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\SearchProfileController;
 
+// BCE route:
+// Boundary/view_profiles.php -> Controller/SearchProfileController.php -> Entity/UserProfileEntity.php.
+// This older generic page searches profiles through the Controller only.
 require_login(['user_admin']);
 
 $search = trim((string) ($_GET['search'] ?? ''));
+// Boundary -> Controller.
 $controller = new SearchProfileController();
 $profiles = $controller->searchProfile($search);
 ?>

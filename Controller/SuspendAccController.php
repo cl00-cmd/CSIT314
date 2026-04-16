@@ -5,12 +5,16 @@ namespace App\Controller;
 
 use App\Entity\UserAccountEntity;
 
+// BCE route:
+// Boundary/suspendAccPage.php calls this Controller.
+// This Controller calls Entity/UserAccountEntity.php.
 final class SuspendAccController
 {
     private UserAccountEntity $accountEntity;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->accountEntity = new UserAccountEntity();
     }
 

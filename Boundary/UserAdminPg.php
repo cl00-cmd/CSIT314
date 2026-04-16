@@ -7,7 +7,9 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UASearchAccController;
 use App\Controller\UserAdminC;
 
-// Boundary page for the suspend-user-account sequence in the User Admin flow.
+// BCE route for the suspend action:
+// Boundary/UserAdminPg.php -> Controller/UserAdminC.php -> Entity/UserAccount.php.
+// This Boundary only calls Controllers, never Entity classes directly.
 require_login(['user_admin']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -19,7 +21,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $search = trim((string) ($_GET['search'] ?? ''));
-// Reuse the search-account controller so admins can filter before suspending users.
+// Boundary -> Controller -> Entity for the list/filter table:
+// Boundary/UserAdminPg.php -> Controller/UASearchAccController.php -> Entity/Account.php.
 $searchController = new UASearchAccController();
 $users = $searchController->searchUserAccount($search);
 ?>

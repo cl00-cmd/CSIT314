@@ -6,6 +6,9 @@ namespace App\Controller;
 use App\Entity\CategoryEntity;
 use App\Entity\ReportEntity;
 
+// BCE route:
+// Boundary/platform_dashboard.php calls this Controller.
+// This Controller calls Entity/CategoryEntity.php and Entity/ReportEntity.php.
 final class PlatformController
 {
     private CategoryEntity $categoryEntity;
@@ -13,7 +16,9 @@ final class PlatformController
 
     public function __construct()
     {
+        // Controller -> Entity for category management.
         $this->categoryEntity = new CategoryEntity();
+        // Controller -> Entity for daily/weekly/monthly report data.
         $this->reportEntity = new ReportEntity();
     }
 

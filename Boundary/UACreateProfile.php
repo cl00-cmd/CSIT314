@@ -6,7 +6,9 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\UACreateProfileC;
 
-// Boundary page for creating new profile role types.
+// BCE route:
+// Boundary/UACreateProfile.php -> Controller/UACreateProfileC.php -> Entity/Profile.php.
+// This Boundary only talks to the Controller; it does not call Entity classes directly.
 require_login(['user_admin']);
 
 $controller = new UACreateProfileC();

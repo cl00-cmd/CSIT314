@@ -7,6 +7,8 @@ use App\Config\Database;
 use PDO;
 use RuntimeException;
 
+// Entity layer for donation records and donor donation history.
+// Called by Controller/DonorController.php.
 final class DonationEntity
 {
     private PDO $db;
@@ -16,7 +18,7 @@ final class DonationEntity
         $this->db = Database::getConnection();
     }
 
-    public function createDonation(int $doneeUserId, int $campaignId, float $amount, string $message): bool
+    public function createDonation(int $donorUserId, int $campaignId, float $amount, string $message): bool
     {
         $this->db->beginTransaction();
 
@@ -39,12 +41,12 @@ final class DonationEntity
         }
 
         $donationStatement = $this->db->prepare(
-            'INSERT INTO donations (campaign_id, donee_user_id, amount, message)
-             VALUES (:campaign_id, :donee_user_id, :amount, :message)'
+            'INSERT INTO donations (campaign_id, donor_user_id, amount, message)
+             VALUES (:campaign_id, :donor_user_id, :amount, :message)'
         );
         $donationStatement->execute([
             'campaign_id' => $campaignId,
-            'donee_user_id' => $doneeUserId,
+            'donor_user_id' => $donorUserId,
             'amount' => $amount,
             'message' => $message,
         ]);
@@ -63,15 +65,15 @@ final class DonationEntity
         return true;
     }
 
-    public function getDoneeSummary(int $doneeUserId): array
+    public function getDonorSummary(int $donorUserId): array
     {
         $statement = $this->db->prepare(
             'SELECT COUNT(*) AS donation_count,
                     COALESCE(SUM(amount), 0) AS total_amount
              FROM donations
-             WHERE donee_user_id = :donee_user_id'
+             WHERE donor_user_id = :donor_user_id'
         );
-        $statement->execute(['donee_user_id' => $doneeUserId]);
+        $statement->execute(['donor_user_id' => $donorUserId]);
 
         return $statement->fetch() ?: [
             'donation_count' => 0,
@@ -79,7 +81,7 @@ final class DonationEntity
         ];
     }
 
-    public function getDoneeHistory(int $doneeUserId, array $filters = []): array
+    public function getDonorHistory(int $donorUserId, array $filters = []): array
     {
         $sql = "SELECT d.id, d.amount, d.message, d.donated_at,
                        c.title AS campaign_title, c.status AS campaign_status,
@@ -88,9 +90,9 @@ final class DonationEntity
                 FROM donations d
                 INNER JOIN campaigns c ON c.id = d.campaign_id
                 INNER JOIN categories cat ON cat.id = c.category_id
-                WHERE d.donee_user_id = :donee_user_id";
+                WHERE d.donor_user_id = :donor_user_id";
 
-        $parameters = ['donee_user_id' => $doneeUserId];
+        $parameters = ['donor_user_id' => $donorUserId];
 
         if (!empty($filters['category_id'])) {
             $sql .= ' AND c.category_id = :category_id';

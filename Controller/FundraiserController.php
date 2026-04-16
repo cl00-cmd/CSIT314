@@ -6,6 +6,9 @@ namespace App\Controller;
 use App\Entity\CampaignEntity;
 use App\Entity\CategoryEntity;
 
+// BCE route:
+// Boundary/fundraiser_dashboard.php calls this Controller.
+// This Controller calls Entity/CampaignEntity.php and Entity/CategoryEntity.php.
 final class FundraiserController
 {
     public const SERVICE_TYPES = [
@@ -22,7 +25,9 @@ final class FundraiserController
 
     public function __construct()
     {
+        // Controller -> Entity for fundraiser FSA/campaign data.
         $this->campaignEntity = new CampaignEntity();
+        // Controller -> Entity for category dropdown/filter data.
         $this->categoryEntity = new CategoryEntity();
     }
 

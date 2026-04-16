@@ -5,8 +5,14 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Config\Database;
 
-Database::runSchemaFile(__DIR__ . '/schema.sql');
 $pdo = Database::getConnection();
+$pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+foreach (['donations', 'campaign_views', 'favourites', 'campaigns', 'user_profiles', 'users', 'categories', 'profile_types'] as $table) {
+    $pdo->exec('DROP TABLE IF EXISTS ' . $table);
+}
+$pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+
+Database::runSchemaFile(__DIR__ . '/schema.sql');
 
 $columnCheck = $pdo->prepare(
     'SELECT COUNT(*) FROM information_schema.COLUMNS
@@ -60,7 +66,7 @@ $profileTypeInsert = $pdo->prepare(
 foreach ([
     ['role_code' => 'user_admin', 'role_label' => 'User Admin', 'status' => 'active'],
     ['role_code' => 'fund_raiser', 'role_label' => 'Fund Raiser', 'status' => 'active'],
-    ['role_code' => 'donee', 'role_label' => 'Donee', 'status' => 'active'],
+    ['role_code' => 'donor', 'role_label' => 'Donor', 'status' => 'active'],
     ['role_code' => 'platform_manager', 'role_label' => 'Platform Manager', 'status' => 'active'],
 ] as $roleRow) {
     $profileTypeInsert->execute($roleRow);
@@ -89,7 +95,7 @@ $profileInsert = $pdo->prepare(
 $userIdsByRole = [
     'user_admin' => [],
     'fund_raiser' => [],
-    'donee' => [],
+    'donor' => [],
     'platform_manager' => [],
 ];
 
@@ -97,14 +103,14 @@ $seedUsers = [
     ['username' => 'admin01', 'full_name' => 'Admin One', 'email' => 'admin01@example.com', 'role' => 'user_admin'],
     ['username' => 'admin02', 'full_name' => 'Admin Two', 'email' => 'admin02@example.com', 'role' => 'user_admin'],
     ['username' => 'fr01', 'full_name' => 'Fund Raiser One', 'email' => 'fr01@example.com', 'role' => 'fund_raiser'],
-    ['username' => 'donee01', 'full_name' => 'Donee One', 'email' => 'donee01@example.com', 'role' => 'donee'],
+    ['username' => 'donor01', 'full_name' => 'Donor One', 'email' => 'donor01@example.com', 'role' => 'donor'],
     ['username' => 'pm01', 'full_name' => 'Platform Manager One', 'email' => 'pm01@example.com', 'role' => 'platform_manager'],
 ];
 
 $roleTargets = [
     'user_admin' => 5,
     'fund_raiser' => 30,
-    'donee' => 55,
+    'donor' => 55,
     'platform_manager' => 10,
 ];
 
@@ -116,7 +122,7 @@ foreach ($roleTargets as $role => $count) {
         $username = match ($role) {
             'user_admin' => sprintf('admin%02d', $i),
             'fund_raiser' => sprintf('fr%02d', $i),
-            'donee' => sprintf('donee%02d', $i),
+            'donor' => sprintf('donor%02d', $i),
             default => sprintf('pm%02d', $i),
         };
         $allUsers[] = [
@@ -184,11 +190,11 @@ for ($i = 1; $i <= 120; $i++) {
 }
 
 $favouriteInsert = $pdo->prepare(
-    'INSERT IGNORE INTO favourites (donee_user_id, campaign_id) VALUES (:donee_user_id, :campaign_id)'
+    'INSERT IGNORE INTO favourites (donor_user_id, campaign_id) VALUES (:donor_user_id, :campaign_id)'
 );
 for ($i = 0; $i < 180; $i++) {
     $favouriteInsert->execute([
-        'donee_user_id' => $userIdsByRole['donee'][array_rand($userIdsByRole['donee'])],
+        'donor_user_id' => $userIdsByRole['donor'][array_rand($userIdsByRole['donor'])],
         'campaign_id' => $campaignIds[array_rand($campaignIds)],
     ]);
 }
@@ -199,12 +205,12 @@ $viewInsert = $pdo->prepare(
 for ($i = 0; $i < 300; $i++) {
     $viewInsert->execute([
         'campaign_id' => $campaignIds[array_rand($campaignIds)],
-        'viewer_user_id' => $userIdsByRole['donee'][array_rand($userIdsByRole['donee'])],
+        'viewer_user_id' => $userIdsByRole['donor'][array_rand($userIdsByRole['donor'])],
     ]);
 }
 
 $donationInsert = $pdo->prepare(
-    'INSERT INTO donations (campaign_id, donee_user_id, amount, message) VALUES (:campaign_id, :donee_user_id, :amount, :message)'
+    'INSERT INTO donations (campaign_id, donor_user_id, amount, message) VALUES (:campaign_id, :donor_user_id, :amount, :message)'
 );
 $campaignUpdate = $pdo->prepare(
     'UPDATE campaigns SET current_amount = current_amount + :amount WHERE id = :campaign_id'
@@ -214,7 +220,7 @@ for ($i = 0; $i < 220; $i++) {
     $amount = random_int(20, 800);
     $donationInsert->execute([
         'campaign_id' => $campaignId,
-        'donee_user_id' => $userIdsByRole['donee'][array_rand($userIdsByRole['donee'])],
+        'donor_user_id' => $userIdsByRole['donor'][array_rand($userIdsByRole['donor'])],
         'amount' => $amount,
         'message' => 'Demo donation generated for reporting and history filters.',
     ]);
@@ -234,5 +240,5 @@ echo "Donations: 220\n";
 echo "\nDemo logins:\n";
 echo "admin01 / password123\n";
 echo "fr01 / password123\n";
-echo "donee01 / password123\n";
+echo "donor01 / password123\n";
 echo "pm01 / password123\n";

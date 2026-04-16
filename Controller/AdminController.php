@@ -5,12 +5,15 @@ namespace App\Controller;
 
 use App\Entity\UserEntity;
 
+// BCE route:
+// Older generic user-admin Boundary pages call this Controller.
+// This Controller calls Entity/UserEntity.php for account/profile database work.
 final class AdminController
 {
     public const ROLES = [
         'user_admin',
         'fund_raiser',
-        'donee',
+        'donor',
         'platform_manager',
     ];
 
@@ -18,6 +21,7 @@ final class AdminController
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->userEntity = new UserEntity();
     }
 
@@ -41,7 +45,7 @@ final class AdminController
         $fullName = trim((string) ($input['full_name'] ?? ''));
         $email = trim((string) ($input['email'] ?? ''));
         $password = (string) ($input['password'] ?? '');
-        $role = (string) ($input['role'] ?? 'donee');
+        $role = (string) ($input['role'] ?? 'donor');
 
         if ($username === '' || $fullName === '' || $email === '' || $password === '') {
             return ['success' => false, 'message' => 'Username, full name, email, and password are required.'];
@@ -78,7 +82,7 @@ final class AdminController
         $userId = (int) ($input['user_id'] ?? 0);
         $fullName = trim((string) ($input['full_name'] ?? ''));
         $email = trim((string) ($input['email'] ?? ''));
-        $role = (string) ($input['role'] ?? 'donee');
+        $role = (string) ($input['role'] ?? 'donor');
         $status = (string) ($input['status'] ?? 'active');
         $password = (string) ($input['password'] ?? '');
 

@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Account;
 
-// Control class for viewing one user account in detail.
+// BCE route:
+// Boundary/UAViewAcc.php calls this Controller.
+// This Controller then calls Entity/Account.php.
 final class UAViewAccC
 {
     private Account $account;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->account = new Account();
     }
 

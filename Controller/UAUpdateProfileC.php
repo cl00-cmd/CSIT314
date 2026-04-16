@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Profile;
 
-// Control class for loading and updating a single user profile.
+// BCE route:
+// Boundary/UAUpdateProfile.php calls this Controller.
+// This Controller then calls Entity/Profile.php.
 final class UAUpdateProfileC
 {
     private Profile $profile;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->profile = new Profile();
     }
 

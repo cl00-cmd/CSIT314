@@ -6,6 +6,10 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for user profile records in the user_profiles table.
+// Called by profile Controllers such as SearchProfileController.php,
+// ViewProfileDetailsController.php, UpdateProfileController.php,
+// SuspendProfileController.php, and CreateAccountController.php.
 final class UserProfileEntity
 {
     private PDO $db;
@@ -24,12 +28,19 @@ final class UserProfileEntity
 
         $parameters = [];
         if ($keyword !== '') {
-            $sql .= ' WHERE u.username LIKE :term
-                      OR u.full_name LIKE :term
-                      OR u.role LIKE :term
-                      OR p.organisation LIKE :term
-                      OR p.city LIKE :term';
-            $parameters['term'] = '%' . $keyword . '%';
+            $sql .= ' WHERE u.username LIKE :username_term
+                      OR u.full_name LIKE :full_name_term
+                      OR u.role LIKE :role_term
+                      OR p.organisation LIKE :organisation_term
+                      OR p.city LIKE :city_term';
+            $term = '%' . $keyword . '%';
+            $parameters = [
+                'username_term' => $term,
+                'full_name_term' => $term,
+                'role_term' => $term,
+                'organisation_term' => $term,
+                'city_term' => $term,
+            ];
         }
 
         $sql .= ' ORDER BY p.updated_at DESC, u.id DESC';

@@ -7,7 +7,10 @@ require_once __DIR__ . '/admin_shared.php';
 use App\Controller\UASearchAccController;
 use App\Controller\UASearchProfileC;
 
-// Dashboard boundary that summarises the User Admin BCE area and links to each sequence flow.
+// BCE route:
+// Boundary/admin_dashboard.php -> Controller/UASearchAccController.php -> Entity/Account.php.
+// Boundary/admin_dashboard.php -> Controller/UASearchProfileC.php -> Entity/Profile.php.
+// This Boundary only reads dashboard summary data and links to the specific User Admin sequence pages.
 require_login(['user_admin']);
 
 $searchUserController = new UASearchAccController();

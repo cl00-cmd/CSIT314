@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\UserAccount;
 
-// Control class for suspending or reactivating user account access.
+// BCE route:
+// Boundary/UserAdminPg.php calls this Controller.
+// This Controller then calls Entity/UserAccount.php.
 final class UserAdminC
 {
     private UserAccount $userAccount;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->userAccount = new UserAccount();
     }
 

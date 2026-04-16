@@ -6,6 +6,9 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for FSA category data.
+// Called by Controller/FundraiserController.php, Controller/DonorController.php,
+// and Controller/PlatformController.php.
 final class CategoryEntity
 {
     private PDO $db;
@@ -38,8 +41,10 @@ final class CategoryEntity
         $conditions = [];
         $parameters = [];
         if ($keyword !== '') {
-            $conditions[] = '(c.name LIKE :term OR c.description LIKE :term)';
-            $parameters['term'] = '%' . $keyword . '%';
+            $conditions[] = '(c.name LIKE :name_term OR c.description LIKE :description_term)';
+            $term = '%' . $keyword . '%';
+            $parameters['name_term'] = $term;
+            $parameters['description_term'] = $term;
         }
         if ($activeOnly) {
             $conditions[] = "c.status = 'active'";

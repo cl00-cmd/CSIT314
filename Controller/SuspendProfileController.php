@@ -5,12 +5,16 @@ namespace App\Controller;
 
 use App\Entity\UserProfileEntity;
 
+// BCE route:
+// Boundary/suspendProfilePg.php calls this Controller.
+// This Controller calls Entity/UserProfileEntity.php.
 final class SuspendProfileController
 {
     private UserProfileEntity $profileEntity;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->profileEntity = new UserProfileEntity();
     }
 

@@ -5,8 +5,13 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controller\PlatformController;
 
+// BCE route:
+// Boundary/platform_dashboard.php -> Controller/PlatformController.php
+// -> Entity/CategoryEntity.php and Entity/ReportEntity.php.
+// This Boundary collects category/report input and sends it to the Controller.
 require_login(['platform_manager']);
 
+// Boundary -> Controller.
 $controller = new PlatformController();
 $user = current_user();
 

@@ -6,9 +6,12 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\UAUpdateProfileC;
 
-// Boundary page for loading a profile and sending edited values to the controller.
+// BCE route:
+// Boundary/UAUpdateProfile.php -> Controller/UAUpdateProfileC.php -> Entity/Profile.php.
+// This page is opened from search/view results, so it stays hidden from the dashboard shortcut list.
 require_login(['user_admin']);
 
+// Boundary -> Controller.
 $controller = new UAUpdateProfileC();
 $userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
 $profile = $userId > 0 ? $controller->searchProfile($userId) : null;

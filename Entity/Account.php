@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-// BCE entity wrapper for the user account lifeline used in the User Admin diagrams.
+// Entity layer in these BCE flows:
+// Controller/UACreateAccountC.php -> Entity/Account.php,
+// Controller/UASearchAccController.php -> Entity/Account.php,
+// Controller/UAViewAccC.php -> Entity/Account.php,
+// Controller/UAUpdateAccController.php -> Entity/Account.php,
+// Controller/UALoginAccountC.php -> Entity/Account.php.
 final class Account
 {
     private UserAccountEntity $accountEntity;

@@ -5,6 +5,9 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controller\LoginController;
 
+// BCE route:
+// Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
+// This Boundary collects the username/password and sends them to the Controller.
 if (current_user() !== null) {
     redirect_to_dashboard_for_role((string) current_user()['role']);
 }
@@ -12,6 +15,7 @@ if (current_user() !== null) {
 $flash = pull_flash();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    // Boundary -> Controller.
     $controller = new LoginController();
     $result = $controller->authenticate(
         (string) ($_POST['username'] ?? ''),
@@ -45,13 +49,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 <p class="eyebrow">CSIT314 BCE Fundraising System</p>
                 <h1>FundSphere</h1>
                 <p class="muted">
-                    A PHP Boundary-Control-Entity fundraising platform for user admins, fund raisers, donees,
+                    A PHP Boundary-Control-Entity fundraising platform for user admins, fund raisers, donors,
                     and platform managers.
                 </p>
                 <div class="tag-row">
                     <span>User Admin</span>
                     <span>Fund Raiser</span>
-                    <span>Donee</span>
+                    <span>Donor</span>
                     <span>Platform Manager</span>
                 </div>
             </div>

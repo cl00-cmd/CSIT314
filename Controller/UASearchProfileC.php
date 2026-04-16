@@ -5,13 +5,16 @@ namespace App\Controller;
 
 use App\Entity\Profile;
 
-// Control class for the "search user profile" User Admin sequence.
+// BCE route:
+// Boundary/UASearchProfile.php and Boundary/UASuspendProfile.php call this Controller.
+// This Controller then calls Entity/Profile.php.
 final class UASearchProfileC
 {
     private Profile $profile;
 
     public function __construct()
     {
+        // Controller -> Entity.
         $this->profile = new Profile();
     }
 

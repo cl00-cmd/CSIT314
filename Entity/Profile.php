@@ -6,7 +6,12 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
-// BCE entity wrapper for profile-related User Admin sequence flows.
+// Entity layer in these BCE flows:
+// Controller/UASearchProfileC.php -> Entity/Profile.php,
+// Controller/UAViewProfileC.php -> Entity/Profile.php,
+// Controller/UAUpdateProfileC.php -> Entity/Profile.php,
+// Controller/UASuspendProfileC.php -> Entity/Profile.php,
+// Controller/UACreateProfileC.php -> Entity/Profile.php.
 final class Profile
 {
     private UserProfileEntity $profileEntity;

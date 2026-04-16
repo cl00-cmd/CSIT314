@@ -7,7 +7,9 @@ use App\Config\Database;
 use App\Entity\Account;
 use App\Entity\UserProfileEntity;
 
-// Control class for creating both the account record and its matching profile record.
+// BCE route:
+// Boundary/UACreateAccount.php calls this Controller.
+// This Controller then calls Entity/Account.php and Entity/UserProfileEntity.php.
 final class UACreateAccountC
 {
     private Account $account;
@@ -15,7 +17,9 @@ final class UACreateAccountC
 
     public function __construct()
     {
+        // Controller -> Entity: all account saving is delegated to Account.
         $this->account = new Account();
+        // Controller -> Entity: this creates the default profile for the new account.
         $this->profileEntity = new UserProfileEntity();
     }
 
@@ -43,7 +47,7 @@ final class UACreateAccountC
                 'full_name' => $fullName,
                 'email' => $email,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                'role' => (string) ($input['role'] ?? 'donee'),
+                'role' => (string) ($input['role'] ?? 'donor'),
                 'status' => (string) ($input['account_status'] ?? 'active'),
             ]);
 

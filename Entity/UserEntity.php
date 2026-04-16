@@ -6,6 +6,8 @@ namespace App\Entity;
 use App\Config\Database;
 use PDO;
 
+// Entity layer for shared user account/profile data.
+// Called by Controller/LoginController.php and Controller/AdminController.php.
 final class UserEntity
 {
     private PDO $db;
@@ -52,7 +54,7 @@ final class UserEntity
                 SUM(CASE WHEN status = 'suspended' THEN 1 ELSE 0 END) AS suspended_users,
                 SUM(CASE WHEN role = 'user_admin' THEN 1 ELSE 0 END) AS admin_users,
                 SUM(CASE WHEN role = 'fund_raiser' THEN 1 ELSE 0 END) AS fundraiser_users,
-                SUM(CASE WHEN role = 'donee' THEN 1 ELSE 0 END) AS donee_users,
+                SUM(CASE WHEN role = 'donor' THEN 1 ELSE 0 END) AS donor_users,
                 SUM(CASE WHEN role = 'platform_manager' THEN 1 ELSE 0 END) AS platform_users
              FROM users"
         );
@@ -63,7 +65,7 @@ final class UserEntity
             'suspended_users' => 0,
             'admin_users' => 0,
             'fundraiser_users' => 0,
-            'donee_users' => 0,
+            'donor_users' => 0,
             'platform_users' => 0,
         ];
     }
@@ -77,13 +79,21 @@ final class UserEntity
 
         $parameters = [];
         if ($keyword !== '') {
-            $sql .= ' WHERE u.username LIKE :term
-                      OR u.full_name LIKE :term
-                      OR u.email LIKE :term
-                      OR u.role LIKE :term
-                      OR p.organisation LIKE :term
-                      OR p.city LIKE :term';
-            $parameters['term'] = '%' . $keyword . '%';
+            $sql .= ' WHERE u.username LIKE :username_term
+                      OR u.full_name LIKE :full_name_term
+                      OR u.email LIKE :email_term
+                      OR u.role LIKE :role_term
+                      OR p.organisation LIKE :organisation_term
+                      OR p.city LIKE :city_term';
+            $term = '%' . $keyword . '%';
+            $parameters = [
+                'username_term' => $term,
+                'full_name_term' => $term,
+                'email_term' => $term,
+                'role_term' => $term,
+                'organisation_term' => $term,
+                'city_term' => $term,
+            ];
         }
 
         $sql .= ' ORDER BY u.created_at DESC, u.id DESC';
