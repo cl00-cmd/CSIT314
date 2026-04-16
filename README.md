@@ -1,73 +1,62 @@
-# CSIT314
+# CSIT314 BCE PHP Fundraising System
 
-Simple User Admin (UA) login/logout prototype with a static HTML/CSS/JS frontend and a Python backend backed by MySQL.
+This project is now rebuilt as a PHP `Boundary -> Controller -> Entity` fundraising website for the CSIT314 assignment.
 
-## Features
+## Architecture
 
-- Login form (`login.html`) sends credentials to `POST /api/login`
-- Credentials are verified against a MySQL `Account` table
-- Accounts include a `Role` field so different user types can be identified
-- Passwords are stored as PBKDF2-SHA256 hashes with per-user salts
-- Dashboard access (`dashboard.html`) is protected by `sessionStorage`
-- Logout page (`logout.html`) clears the login session
-- User Admin accounts can create new user accounts from the dashboard
+- `Boundary/` contains the user-facing PHP pages.
+- `Controller/` contains the application logic called by each boundary page.
+- `Entity/` contains the database access layer only.
+- `config/Database.php` manages the shared PDO MySQL connection.
+- `database/schema.sql` creates the full system tables.
+- `database/setup.php` creates the schema and loads large demo data.
+- `assets/css/app.css` contains the shared styling.
 
-## Project files
+## Assignment Coverage
 
-- `server.py` - HTTP server and login API, talks to database and third party sources
-- `scripts/auth.js` - frontend login/logout flow and dashboard guard
-- `database/schema.sql` - MySQL schema reference for the `Account` table
-- `login.html`, `dashboard.html`, `logout.html`, `styles.css` - UI
+- Manage different user accounts and profiles for `user_admin`, `fund_raiser`, `donee`, and `platform_manager`.
+- Fund raisers can create and update fundraising activities.
+- Donees can search, view, favourite, and donate to campaigns.
+- Fund raisers can track campaign views and shortlist counts.
+- Fund raisers can search completed FSA history by service type and date period.
+- Donees can search donation history and see campaign progress by category and date period.
+- Platform managers can manage categories and view daily, weekly, and monthly reports.
 
-## Run
-Prerequisite: Open Powershell
-1. Install the Python dependency:
-   - Windows: `py -m pip install -r requirements.txt`
-   - macOS/Linux: `python3 -m pip install -r requirements.txt`
-2. Make sure MySQL is running and phpMyAdmin points to the same MySQL server.
-3. Optional environment variables for the MySQL connection:
-   - `DB_HOST` (default: `127.0.0.1`)
-   - `DB_PORT` (default: `3306`)
-   - `DB_USER` (default: `root`)
-   - `DB_PASSWORD` (default: empty)
-   - `DB_NAME` (default: `csit314`)
-4. Start the server from the project root:
-   - Windows: `py server.py`
-   - macOS/Linux: `python3 server.py`
-5. Open in your browser:
-   - `http://127.0.0.1:8000/login.html`
+## Run With XAMPP
 
-The server automatically creates the MySQL database if it does not exist, ensures the `Account` table exists, and seeds default accounts if missing.
+1. Put this project inside your XAMPP `htdocs` folder, or configure Apache to serve this folder.
+2. Start `Apache` and `MySQL` in XAMPP.
+3. Make sure PHP PDO MySQL is enabled.
+4. Optional environment variables:
+   - `DB_HOST` default `127.0.0.1`
+   - `DB_PORT` default `3306`
+   - `DB_NAME` default `csit314_fundraising`
+   - `DB_USER` default `root`
+   - `DB_PASSWORD` default empty
+5. Run `database/setup.php` once from the browser or CLI to create tables and seed demo data.
+6. Open `Boundary/login.php`.
 
-## Using XAMPP
+If you already ran an older version of this project, run `database/setup.php` again so the latest schema changes are applied.
 
-If you are testing locally with XAMPP:
+## Demo Credentials
 
-1. Start `MySQL` in the XAMPP Control Panel.
-2. Leave MySQL running while testing this project.
-3. Open phpMyAdmin if you want to inspect the database.
-4. You may optionally import `database/schema.sql` manually, but the Python app can also create the database and table automatically.
-5. This project does not run from XAMPP `htdocs` like a PHP project. You still need to start the backend with `py server.py`.
+- `admin01 / password123`
+- `fr01 / password123`
+- `donee01 / password123`
+- `pm01 / password123`
 
-## Configuration
+## Demo Data
 
-- `CSIT314_HOST` (default: `127.0.0.1`)
-- `CSIT314_PORT` (default: `8000`)
-- `DB_HOST` (default: `127.0.0.1`)
-- `DB_PORT` (default: `3306`)
-- `DB_USER` (default: `root`)
-- `DB_PASSWORD` (default: empty)
-- `DB_NAME` (default: `csit314`)
+`database/setup.php` creates large sample data for live demonstration:
 
-## Demo credentials
+- 100 users
+- 100 categories
+- 120 campaigns
+- 180+ favourites
+- 300 views
+- 220 donations
 
-- Account 1
-  - User ID: `ua`
-  - Password: `admin123`
-  - Email: `ua@example.com`
-  - Role: `user_admin`
-- Account 2
-  - User ID: `UATest1`
-  - Password: `1234`
-  - Email: `uatest1@example.com`
-  - Role: `user_admin`
+## Notes
+
+- The older Python prototype files are still in the repository as legacy reference, but the new website flow is the PHP BCE implementation.
+- In BCE usage for this project, each Boundary page calls a Controller, and each Controller calls one or more Entities for database work.
