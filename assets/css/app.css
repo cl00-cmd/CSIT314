@@ -217,8 +217,23 @@ code {
 }
 
 .panel__header--stack {
-    align-items: end;
+    align-items: center;
     flex-wrap: wrap;
+}
+
+.panel__header .inline-filters {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+}
+
+.panel__header .inline-filters input {
+    flex: 1 1 320px;
+    width: auto;
+    min-width: 280px;
+}
+
+.panel__header .inline-filters .button {
+    flex: 0 0 auto;
 }
 
 .stats-grid,
@@ -409,6 +424,17 @@ th {
 
     .topbar__nav .button {
         width: auto;
+    }
+
+    .panel__header .inline-filters {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .panel__header .inline-filters input {
+        width: 100%;
+        min-width: 0;
     }
 
     .form-grid {
