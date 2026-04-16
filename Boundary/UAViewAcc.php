@@ -31,7 +31,6 @@ $account = $userId > 0 ? $controller->findAccount($userId) : null;
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UAViewAcc -> UAViewAccC -> Account</p>
                     <h2><?= $account !== null ? e($account['full_name']) : 'Account not found' ?></h2>
                 </div>
             </div>

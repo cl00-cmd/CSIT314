@@ -46,16 +46,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <main class="auth-shell">
         <section class="auth-panel">
             <div class="hero-copy">
-                <p class="eyebrow">User Admin BCE Sequence</p>
                 <h1>UALoginAccount</h1>
-                <p class="muted">
-                    This boundary follows your sequence diagram for the user admin login flow.
-                </p>
-                <div class="tag-row">
-                    <span>UALoginAccount</span>
-                    <span>UALoginAccountC</span>
-                    <span>Account</span>
-                </div>
             </div>
 
             <form method="post" class="card form-stack">

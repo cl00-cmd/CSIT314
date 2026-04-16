@@ -44,7 +44,6 @@ $profiles = $searchController->searchProfile($search);
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <p class="section-label">UASuspendProfile -> UASuspendProfileC -> Profile</p>
                     <h2>Suspend the user profile so that the access can be controlled</h2>
                 </div>
                 <form method="get" class="inline-filters">

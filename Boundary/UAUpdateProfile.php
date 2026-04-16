@@ -38,7 +38,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UAUpdateProfile -> UAUpdateProfileC -> Profile</p>
                     <h2><?= $profile !== null ? e($profile['full_name']) : 'Choose a user profile from UASearchProfile' ?></h2>
                 </div>
             </div>

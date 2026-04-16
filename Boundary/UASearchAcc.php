@@ -32,7 +32,6 @@ $hasSearched = $search !== '';
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <p class="section-label">UASearchAcc -> UASearchAccController -> Account</p>
                     <h2>Search and list user accounts</h2>
                 </div>
                 <form method="get" class="inline-filters">

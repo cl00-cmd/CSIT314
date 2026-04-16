@@ -54,37 +54,50 @@ $suspendedProfiles = count(array_filter($profiles, static fn (array $row): bool 
             </article>
         </section>
 
-        <section class="shortcut-grid">
-            <a class="shortcut-card" href="UACreateAccount.php">
-                <p class="section-label">Create Account</p>
-                <h2>Create user accounts and profiles</h2>
-                <p class="muted">UACreateAccount -> UACreateAccountC -> Account</p>
-            </a>
-            <a class="shortcut-card" href="UASearchAcc.php">
-                <p class="section-label">Search / View User Account</p>
-                <h2>Search and review user accounts</h2>
-                <p class="muted">UASearchAcc and UAViewAcc -> UASearchAccController and UAViewAccC -> Account</p>
-            </a>
-            <a class="shortcut-card" href="UserAdminPg.php">
-                <p class="section-label">Suspend User Account</p>
-                <h2>Suspend or reactivate account access</h2>
-                <p class="muted">UserAdminPg -> UserAdminC -> UserAccount</p>
-            </a>
-            <a class="shortcut-card" href="UACreateProfile.php">
-                <p class="section-label">Create User Profile</p>
-                <h2>Create user profile role types</h2>
-                <p class="muted">UACreateProfile -> UACreateProfileC -> Profile</p>
-            </a>
-            <a class="shortcut-card" href="UASearchProfile.php">
-                <p class="section-label">Search / View User Profile</p>
-                <h2>Search and review user profiles</h2>
-                <p class="muted">UASearchProfile and UAViewProfile -> UASearchProfileC and UAViewProfileC -> Profile</p>
-            </a>
-            <a class="shortcut-card" href="UASuspendProfile.php">
-                <p class="section-label">Suspend User Profile</p>
-                <h2>Suspend or reactivate user profiles</h2>
-                <p class="muted">UASuspendProfile -> UASuspendProfileC -> Profile</p>
-            </a>
+        <section class="panel">
+            <div class="panel__header">
+                <div>
+                    <h2>View Overall Accounts</h2>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Account Status</th>
+                            <th>Profile Status</th>
+                            <th>Organisation</th>
+                            <th>City</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($accounts as $account): ?>
+                            <tr>
+                                <td>
+                                    <strong><?= e($account['full_name']) ?></strong><br>
+                                    <span class="muted"><?= e($account['username']) ?></span>
+                                </td>
+                                <td><?= e($account['email']) ?></td>
+                                <td><?= e($account['role']) ?></td>
+                                <td><?= e($account['status']) ?></td>
+                                <td><?= e($account['profile_status'] ?? 'active') ?></td>
+                                <td><?= e($account['organisation'] ?? '-') ?></td>
+                                <td><?= e($account['city'] ?? '-') ?></td>
+                                <td class="action-row">
+                                    <a class="button button--ghost button--small" href="UAViewAcc.php?id=<?= e((string) $account['id']) ?>">View</a>
+                                    <a class="button button--ghost button--small" href="UAUpdateAcc.php?id=<?= e((string) $account['id']) ?>">Update</a>
+                                    <a class="button button--ghost button--small" href="UserAdminPg.php?id=<?= e((string) $account['id']) ?>">Suspend</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 </body>

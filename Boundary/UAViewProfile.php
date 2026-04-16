@@ -31,7 +31,6 @@ $profile = $userId > 0 ? $controller->findProfile($userId) : null;
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UAViewProfile -> UAViewProfileC -> Profile</p>
                     <h2><?= $profile !== null ? e($profile['full_name']) : 'Profile not found' ?></h2>
                 </div>
             </div>

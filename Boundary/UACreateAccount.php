@@ -40,7 +40,6 @@ $profileTypes = $profileController->listProfiles();
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UACreateAccount -> UACreateAccountC -> Account</p>
                     <h2>Create a user account so that more users can join in</h2>
                 </div>
             </div>

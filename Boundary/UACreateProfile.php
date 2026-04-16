@@ -37,7 +37,6 @@ $profileTypes = $controller->listProfiles();
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UACreateProfile -> UACreateProfileC -> Profile</p>
                     <h2>Create a user profile role so there is a new user role</h2>
                 </div>
             </div>

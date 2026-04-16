@@ -41,7 +41,6 @@ $users = $searchController->searchUserAccount($search);
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <p class="section-label">UserAdminPg -> UserAdminC -> UserAccount</p>
                     <h2>Suspend the user account so that the account has no access</h2>
                 </div>
                 <form method="get" class="inline-filters">

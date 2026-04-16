@@ -23,7 +23,6 @@ function render_admin_topbar(string $title, string $activePage): void
     ?>
     <header class="topbar">
         <div class="topbar__brand">
-            <p class="eyebrow">User Admin BCE</p>
             <h1><?= e($title) ?></h1>
         </div>
         <nav class="topbar__nav" aria-label="User admin navigation">

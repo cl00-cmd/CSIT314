@@ -42,7 +42,6 @@ $profileTypes = $profileController->listProfiles();
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">UAUpdateAcc -> UAUpdateAccController -> Account</p>
                     <h2><?= $account !== null ? e($account['username']) : 'Choose a user account from UASearchAcc' ?></h2>
                 </div>
             </div>

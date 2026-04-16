@@ -46,12 +46,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <main class="auth-shell">
         <section class="auth-panel">
             <div class="hero-copy">
-                <p class="eyebrow">CSIT314 BCE Fundraising System</p>
                 <h1>FundSphere</h1>
-                <p class="muted">
-                    A PHP Boundary-Control-Entity fundraising platform for user admins, fund raisers, donors,
-                    and platform managers.
-                </p>
                 <div class="tag-row">
                     <span>User Admin</span>
                     <span>Fund Raiser</span>
