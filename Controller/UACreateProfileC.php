@@ -37,8 +37,8 @@ final class UACreateProfileC
         ];
     }
 
-    public function listProfiles(): array
+    public function listProfiles(bool $activeOnly = false): array
     {
-        return $this->profile->getRoleTypes(false);
+        return $this->profile->getRoleTypes($activeOnly);
     }
 }

@@ -23,21 +23,27 @@ final class UASuspendProfileC
         return $this->profile->getProfile($userId);
     }
 
-    public function suspendProfile(int $userId, bool $shouldSuspend): array
+    public function searchProfileRoles(string $keyword = ''): array
     {
-        if ($userId <= 0) {
-            return ['success' => false, 'message' => 'Invalid profile selected.'];
+        return $this->profile->findProfileRoles(trim($keyword));
+    }
+
+    public function suspendProfile(string $roleCode, bool $shouldSuspend): array
+    {
+        $roleCode = trim($roleCode);
+        if ($roleCode === '') {
+            return ['success' => false, 'message' => 'Invalid profile role selected.'];
         }
 
         try {
-            $updated = $this->profile->suspendProfile($userId, $shouldSuspend ? 'suspended' : 'active');
+            $updated = $this->profile->suspendProfileRole($roleCode, $shouldSuspend ? 'suspended' : 'active');
         } catch (\Throwable) {
-            return ['success' => false, 'message' => 'Unable to update the profile status.'];
+            return ['success' => false, 'message' => 'Unable to update the profile role status.'];
         }
 
         return [
             'success' => $updated,
-            'message' => $shouldSuspend ? 'Profile Suspended' : 'Profile Reactivated',
+            'message' => $shouldSuspend ? 'Profile Role Suspended' : 'Profile Role Reactivated',
         ];
     }
 }

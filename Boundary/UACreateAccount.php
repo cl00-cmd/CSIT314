@@ -23,7 +23,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 $profileController = new UACreateProfileC();
 // Boundary -> Controller -> Entity for the role dropdown:
 // Boundary/UACreateAccount.php -> Controller/UACreateProfileC.php -> Entity/Profile.php.
-$profileTypes = $profileController->listProfiles();
+$profileTypes = $profileController->listProfiles(true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,13 +70,6 @@ $profileTypes = $profileController->listProfiles();
                     </select>
                 </label>
                 <label class="field">
-                    <span>Account Status</span>
-                    <select name="account_status">
-                        <option value="active">active</option>
-                        <option value="suspended">suspended</option>
-                    </select>
-                </label>
-                <label class="field">
                     <span>Phone</span>
                     <input type="text" name="phone">
                 </label>
@@ -87,13 +80,6 @@ $profileTypes = $profileController->listProfiles();
                 <label class="field">
                     <span>City</span>
                     <input type="text" name="city">
-                </label>
-                <label class="field">
-                    <span>Profile Status</span>
-                    <select name="profile_status">
-                        <option value="active">active</option>
-                        <option value="suspended">suspended</option>
-                    </select>
                 </label>
                 <label class="field field--full">
                     <span>Biography</span>

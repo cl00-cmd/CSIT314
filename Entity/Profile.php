@@ -28,6 +28,29 @@ final class Profile
         return $this->profileEntity->searchProfiles($keyword);
     }
 
+    public function findProfileRoles(string $keyword = ''): array
+    {
+        $sql = 'SELECT role_code, role_label, status FROM profile_types';
+        $parameters = [];
+
+        if ($keyword !== '') {
+            $sql .= ' WHERE role_code LIKE :role_code_term
+                      OR role_label LIKE :role_label_term
+                      OR status LIKE :status_term';
+            $term = '%' . $keyword . '%';
+            $parameters = [
+                'role_code_term' => $term,
+                'role_label_term' => $term,
+                'status_term' => $term,
+            ];
+        }
+
+        $sql .= ' ORDER BY role_label ASC';
+        $statement = $this->db->prepare($sql);
+        $statement->execute($parameters);
+        return $statement->fetchAll();
+    }
+
     public function getProfile(int $userId): ?array
     {
         return $this->profileEntity->getProfileByUserId($userId);
@@ -41,6 +64,21 @@ final class Profile
     public function suspendProfile(int $userId, string $status = 'suspended'): bool
     {
         return $this->profileEntity->suspendProfile($userId, $status);
+    }
+
+    public function suspendProfileRole(string $roleCode, string $status = 'suspended'): bool
+    {
+        $statement = $this->db->prepare(
+            'UPDATE profile_types
+             SET status = :status
+             WHERE role_code = :role_code'
+        );
+        $statement->execute([
+            'role_code' => $roleCode,
+            'status' => $status,
+        ]);
+
+        return $statement->rowCount() > 0;
     }
 
     public function addProfile(string $role): string

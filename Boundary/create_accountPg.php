@@ -68,13 +68,6 @@ $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
                     </select>
                 </label>
                 <label class="field">
-                    <span>Account Status</span>
-                    <select name="account_status">
-                        <option value="active">active</option>
-                        <option value="suspended">suspended</option>
-                    </select>
-                </label>
-                <label class="field">
                     <span>Phone</span>
                     <input type="text" name="phone">
                 </label>
@@ -85,13 +78,6 @@ $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
                 <label class="field">
                     <span>City</span>
                     <input type="text" name="city">
-                </label>
-                <label class="field">
-                    <span>Profile Status</span>
-                    <select name="profile_status">
-                        <option value="active">active</option>
-                        <option value="suspended">suspended</option>
-                    </select>
                 </label>
                 <label class="field field--full">
                     <span>Biography</span>

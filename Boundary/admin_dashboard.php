@@ -6,6 +6,7 @@ require_once __DIR__ . '/admin_shared.php';
 
 use App\Controller\UASearchAccController;
 use App\Controller\UASearchProfileC;
+use App\Controller\UASuspendProfileC;
 
 // BCE route:
 // Boundary/admin_dashboard.php -> Controller/UASearchAccController.php -> Entity/Account.php.
@@ -15,11 +16,13 @@ require_login(['user_admin']);
 
 $searchUserController = new UASearchAccController();
 $searchProfileController = new UASearchProfileC();
+$suspendProfileController = new UASuspendProfileC();
 
 $accounts = $searchUserController->searchUserAccount();
 $profiles = $searchProfileController->searchProfile();
+$profileRoles = $suspendProfileController->searchProfileRoles();
 $suspendedAccounts = count(array_filter($accounts, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
-$suspendedProfiles = count(array_filter($profiles, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
+$suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,8 +52,8 @@ $suspendedProfiles = count(array_filter($profiles, static fn (array $row): bool 
                 <strong><?= e((string) $suspendedAccounts) ?></strong>
             </article>
             <article class="stat-card">
-                <span>Suspended Profiles</span>
-                <strong><?= e((string) $suspendedProfiles) ?></strong>
+                <span>Suspended Roles</span>
+                <strong><?= e((string) $suspendedProfileRoles) ?></strong>
             </article>
         </section>
 
@@ -91,7 +94,6 @@ $suspendedProfiles = count(array_filter($profiles, static fn (array $row): bool 
                                 <td class="action-row">
                                     <a class="button button--ghost button--small" href="UAViewAcc.php?id=<?= e((string) $account['id']) ?>">View</a>
                                     <a class="button button--ghost button--small" href="UAUpdateAcc.php?id=<?= e((string) $account['id']) ?>">Update</a>
-                                    <a class="button button--ghost button--small" href="UserAdminPg.php?id=<?= e((string) $account['id']) ?>">Suspend</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

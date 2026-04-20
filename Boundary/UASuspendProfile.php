@@ -4,7 +4,6 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/admin_shared.php';
 
-use App\Controller\UASearchProfileC;
 use App\Controller\UASuspendProfileC;
 
 // BCE route for the suspend action:
@@ -12,11 +11,12 @@ use App\Controller\UASuspendProfileC;
 // This Boundary only calls Controllers, never Entity classes directly.
 require_login(['user_admin']);
 
+$controller = new UASuspendProfileC();
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    // Boundary -> Control: toggle whether the selected profile is suspended.
-    $controller = new UASuspendProfileC();
+    // Boundary -> Control: toggle whether the selected profile role is suspended.
     $result = $controller->suspendProfile(
-        (int) ($_POST['user_id'] ?? 0),
+        (string) ($_POST['role_code'] ?? ''),
         (string) ($_POST['target_status'] ?? 'suspended') === 'suspended'
     );
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
@@ -25,9 +25,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
 $search = trim((string) ($_GET['search'] ?? ''));
 // Boundary -> Controller -> Entity for the list/filter table:
-// Boundary/UASuspendProfile.php -> Controller/UASearchProfileC.php -> Entity/Profile.php.
-$searchController = new UASearchProfileC();
-$profiles = $searchController->searchProfile($search);
+// Boundary/UASuspendProfile.php -> Controller/UASuspendProfileC.php -> Entity/Profile.php.
+$profileRoles = $controller->searchProfileRoles($search);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,10 +43,10 @@ $profiles = $searchController->searchProfile($search);
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <h2>Suspend the user profile so that the access can be controlled</h2>
+                    <h2>Suspend the profile role so that role access can be controlled</h2>
                 </div>
                 <form method="get" class="inline-filters">
-                    <input type="text" name="search" value="<?= e($search) ?>" placeholder="Search full name, role, organisation, city">
+                    <input type="text" name="search" value="<?= e($search) ?>" placeholder="Search role name or status">
                     <button type="submit" class="button button--ghost">Search</button>
                 </form>
             </div>
@@ -56,24 +55,22 @@ $profiles = $searchController->searchProfile($search);
                 <table>
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>Organisation</th>
+                            <th>Role</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($profiles as $profile): ?>
+                        <?php foreach ($profileRoles as $profileRole): ?>
                             <tr>
-                                <td><?= e($profile['full_name']) ?> <span class="muted">(<?= e($profile['username']) ?>)</span></td>
-                                <td><?= e($profile['organisation']) ?> <span class="muted"><?= e($profile['city']) ?></span></td>
-                                <td><?= e($profile['status']) ?></td>
+                                <td><?= e($profileRole['role_label']) ?> <span class="muted">(<?= e($profileRole['role_code']) ?>)</span></td>
+                                <td><?= e($profileRole['status']) ?></td>
                                 <td>
                                     <form method="post">
-                                        <input type="hidden" name="user_id" value="<?= e((string) $profile['id']) ?>">
-                                        <input type="hidden" name="target_status" value="<?= e(($profile['status'] ?? '') === 'suspended' ? 'active' : 'suspended') ?>">
-                                        <button type="submit" class="button <?= ($profile['status'] ?? '') === 'suspended' ? 'button--ghost' : 'button--primary' ?> button--small">
-                                            <?= ($profile['status'] ?? '') === 'suspended' ? 'Reactivate Profile' : 'Suspend Profile' ?>
+                                        <input type="hidden" name="role_code" value="<?= e($profileRole['role_code']) ?>">
+                                        <input type="hidden" name="target_status" value="<?= e(($profileRole['status'] ?? '') === 'suspended' ? 'active' : 'suspended') ?>">
+                                        <button type="submit" class="button <?= ($profileRole['status'] ?? '') === 'suspended' ? 'button--ghost' : 'button--primary' ?> button--small">
+                                            <?= ($profileRole['status'] ?? '') === 'suspended' ? 'Reactivate' : 'Suspend' ?>
                                         </button>
                                     </form>
                                 </td>

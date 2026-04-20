@@ -75,13 +75,7 @@ $profileTypes = $profileController->listProfiles();
                             <?php endforeach; ?>
                         </select>
                     </label>
-                    <label class="field">
-                        <span>Status</span>
-                        <select name="status">
-                            <option value="active" <?= selected_if($account['status'], 'active') ?>>active</option>
-                            <option value="suspended" <?= selected_if($account['status'], 'suspended') ?>>suspended</option>
-                        </select>
-                    </label>
+                    <input type="hidden" name="status" value="<?= e($account['status']) ?>">
                     <button type="submit" class="button button--primary">Update Account</button>
                 </form>
             <?php endif; ?>
