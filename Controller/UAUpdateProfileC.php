@@ -18,34 +18,36 @@ final class UAUpdateProfileC
         $this->profile = new Profile();
     }
 
-    public function searchProfile(int $userId): ?array
+    public function searchProfile(string $roleCode): ?array
     {
-        return $this->profile->getProfile($userId);
+        return $this->profile->getProfileRole($roleCode);
     }
 
     public function updateProfile(array $input): array
     {
-        $userId = (int) ($input['user_id'] ?? 0);
-        if ($userId <= 0) {
-            return ['success' => false, 'message' => 'Invalid profile selected.'];
+        $roleCode = trim((string) ($input['role_code'] ?? ''));
+        $roleLabel = trim((string) ($input['role_label'] ?? ''));
+        $status = (string) ($input['status'] ?? 'active');
+
+        if ($roleCode === '') {
+            return ['success' => false, 'message' => 'Invalid profile role selected.'];
+        }
+        if ($roleLabel === '') {
+            return ['success' => false, 'message' => 'Please enter a role name.'];
+        }
+        if (!in_array($status, ['active', 'suspended'], true)) {
+            return ['success' => false, 'message' => 'Please choose a valid role status.'];
         }
 
         try {
-            $updated = $this->profile->editProfile([
-                'user_id' => $userId,
-                'phone' => trim((string) ($input['phone'] ?? '')),
-                'organisation' => trim((string) ($input['organisation'] ?? '')),
-                'city' => trim((string) ($input['city'] ?? '')),
-                'biography' => trim((string) ($input['biography'] ?? '')),
-                'status' => (string) ($input['status'] ?? 'active'),
-            ]);
+            $updated = $this->profile->editProfileRole($roleCode, $roleLabel, $status);
         } catch (\Throwable) {
-            return ['success' => false, 'message' => 'Unable to update the user profile.'];
+            return ['success' => false, 'message' => 'Unable to update the profile role.'];
         }
 
         return [
-            'success' => $updated,
-            'message' => $updated ? 'Profile Updated' : 'Unable to update the user profile.',
+            'success' => true,
+            'message' => $updated ? 'Profile Role Updated' : 'No profile role changes were needed.',
         ];
     }
 }

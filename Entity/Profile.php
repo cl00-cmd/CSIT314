@@ -30,7 +30,8 @@ final class Profile
 
     public function findProfileRoles(string $keyword = ''): array
     {
-        $sql = 'SELECT role_code, role_label, status FROM profile_types';
+        // Entity reads the profile_types table because "Suspend Profile" manages roles.
+        $sql = 'SELECT id, role_code, role_label, status, created_at FROM profile_types';
         $parameters = [];
 
         if ($keyword !== '') {
@@ -51,6 +52,19 @@ final class Profile
         return $statement->fetchAll();
     }
 
+    public function getProfileRole(string $roleCode): ?array
+    {
+        $statement = $this->db->prepare(
+            'SELECT id, role_code, role_label, status, created_at
+             FROM profile_types
+             WHERE role_code = :role_code'
+        );
+        $statement->execute(['role_code' => trim($roleCode)]);
+        $profileRole = $statement->fetch();
+
+        return $profileRole === false ? null : $profileRole;
+    }
+
     public function getProfile(int $userId): ?array
     {
         return $this->profileEntity->getProfileByUserId($userId);
@@ -68,6 +82,7 @@ final class Profile
 
     public function suspendProfileRole(string $roleCode, string $status = 'suspended'): bool
     {
+        // Entity updates only profile_types.status, so account status and user_profiles remain unchanged.
         $statement = $this->db->prepare(
             'UPDATE profile_types
              SET status = :status
@@ -75,6 +90,23 @@ final class Profile
         );
         $statement->execute([
             'role_code' => $roleCode,
+            'status' => $status,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function editProfileRole(string $roleCode, string $roleLabel, string $status): bool
+    {
+        $statement = $this->db->prepare(
+            'UPDATE profile_types
+             SET role_label = :role_label,
+                 status = :status
+             WHERE role_code = :role_code'
+        );
+        $statement->execute([
+            'role_code' => trim($roleCode),
+            'role_label' => trim($roleLabel),
             'status' => $status,
         ]);
 
@@ -100,6 +132,7 @@ final class Profile
 
     public function getRoleTypes(bool $activeOnly = true): array
     {
+        // Entity supports both use cases: all roles for admin management, active roles for account creation.
         $sql = 'SELECT role_code, role_label, status FROM profile_types';
         if ($activeOnly) {
             $sql .= " WHERE status = 'active'";

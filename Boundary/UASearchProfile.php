@@ -8,7 +8,7 @@ use App\Controller\UASearchProfileC;
 
 // BCE route:
 // Boundary/UASearchProfile.php -> Controller/UASearchProfileC.php -> Entity/Profile.php.
-// This Boundary collects the search keyword and asks the Controller for results.
+// This Boundary searches profile roles in profile_types through the Controller.
 require_login(['user_admin']);
 
 $search = trim((string) ($_GET['search'] ?? ''));
@@ -32,44 +32,41 @@ $hasSearched = $search !== '';
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <h2>Search for a user profile</h2>
+                    <h2>Search profile roles</h2>
                 </div>
                 <form method="get" class="inline-filters">
-                    <input type="text" name="search" value="<?= e($search) ?>" placeholder="Search full name, role, organisation, city">
+                    <input type="text" name="search" value="<?= e($search) ?>" placeholder="Search role name, role code, or status">
                     <button type="submit" class="button button--ghost">Search</button>
                 </form>
             </div>
 
             <?php if ($hasSearched && $profiles === []): ?>
                 <div class="flash flash--error">
-                    No user profile found for "<?= e($search) ?>". Please try another name, role, organisation, or city.
+                    No profile role found for "<?= e($search) ?>". Please try another role name, role code, or status.
                 </div>
             <?php else: ?>
                 <div class="table-shell">
                     <table>
                         <thead>
                             <tr>
-                                <th>User</th>
-                                <th>Contact</th>
-                                <th>Organisation</th>
-                                <th>Profile Status</th>
+                                <th>Role Code</th>
+                                <th>Role Name</th>
+                                <th>Status</th>
+                                <th>Created</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($profiles as $profile): ?>
                                 <tr>
-                                    <td>
-                                        <strong><?= e($profile['full_name']) ?></strong><br>
-                                        <span class="muted"><?= e($profile['username']) ?> | <?= e($profile['role']) ?></span>
-                                    </td>
-                                    <td><?= e($profile['phone']) ?><br><span class="muted"><?= e($profile['email']) ?></span></td>
-                                    <td><?= e($profile['organisation']) ?><br><span class="muted"><?= e($profile['city']) ?></span></td>
+                                    <td><?= e($profile['role_code']) ?></td>
+                                    <td><strong><?= e($profile['role_label']) ?></strong></td>
                                     <td><?= e($profile['status']) ?></td>
+                                    <td><?= e(format_date($profile['created_at'] ?? null)) ?></td>
                                     <td class="action-row">
-                                        <a class="button button--ghost button--small" href="UAViewProfile.php?id=<?= e((string) $profile['id']) ?>">View Profile</a>
-                                        <a class="button button--ghost button--small" href="UAUpdateProfile.php?id=<?= e((string) $profile['id']) ?>">Update Profile</a>
-                                        <a class="button button--ghost button--small" href="UASuspendProfile.php?id=<?= e((string) $profile['id']) ?>">Suspend Profile</a>
+                                        <a class="button button--ghost button--small" href="UAViewProfile.php?role_code=<?= e(rawurlencode((string) $profile['role_code'])) ?>">View Profile</a>
+                                        <a class="button button--ghost button--small" href="UAUpdateProfile.php?role_code=<?= e(rawurlencode((string) $profile['role_code'])) ?>">Update Profile</a>
+                                        <a class="button button--ghost button--small" href="UASuspendProfile.php?search=<?= e(rawurlencode((string) $profile['role_code'])) ?>">Suspend Profile</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

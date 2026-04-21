@@ -18,6 +18,8 @@ $searchUserController = new UASearchAccController();
 $searchProfileController = new UASearchProfileC();
 $suspendProfileController = new UASuspendProfileC();
 
+// Boundary -> Controller calls for dashboard counts.
+// Account lists come from user records; profile counts come from profile_types because profiles are roles.
 $accounts = $searchUserController->searchUserAccount();
 $profiles = $searchProfileController->searchProfile();
 $profileRoles = $suspendProfileController->searchProfileRoles();
@@ -44,7 +46,7 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                 <strong><?= e((string) count($accounts)) ?></strong>
             </article>
             <article class="stat-card">
-                <span>User Profiles</span>
+                <span>Profile Roles</span>
                 <strong><?= e((string) count($profiles)) ?></strong>
             </article>
             <article class="stat-card">
@@ -92,6 +94,8 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                                 <td><?= e($account['organisation'] ?? '-') ?></td>
                                 <td><?= e($account['city'] ?? '-') ?></td>
                                 <td class="action-row">
+                                    <!-- Dashboard keeps low-risk actions only.
+                                         Suspension is handled in the dedicated suspend pages. -->
                                     <a class="button button--ghost button--small" href="UAViewAcc.php?id=<?= e((string) $account['id']) ?>">View</a>
                                     <a class="button button--ghost button--small" href="UAUpdateAcc.php?id=<?= e((string) $account['id']) ?>">Update</a>
                                 </td>

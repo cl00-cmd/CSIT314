@@ -39,6 +39,7 @@ final class UACreateProfileC
 
     public function listProfiles(bool $activeOnly = false): array
     {
+        // Controller -> Entity: activeOnly lets create-account pages hide suspended roles.
         return $this->profile->getRoleTypes($activeOnly);
     }
 }

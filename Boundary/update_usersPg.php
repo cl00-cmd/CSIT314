@@ -27,6 +27,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
+// This older Boundary page mirrors UAUpdateAcc.php.
+// Status is preserved here and changed only through the suspend-account flow.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,6 +77,7 @@ $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
                             <?php endforeach; ?>
                         </select>
                     </label>
+                    <!-- Hidden status prevents a normal profile/account edit from changing suspension state. -->
                     <input type="hidden" name="status" value="<?= e($account['status']) ?>">
                     <button type="submit" class="button button--primary">Update Account</button>
                 </form>

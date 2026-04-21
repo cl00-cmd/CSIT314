@@ -8,19 +8,19 @@ use App\Controller\UAUpdateProfileC;
 
 // BCE route:
 // Boundary/UAUpdateProfile.php -> Controller/UAUpdateProfileC.php -> Entity/Profile.php.
-// This page is opened from search/view results, so it stays hidden from the dashboard shortcut list.
+// This page updates profile roles from profile_types, not individual user profile records.
 require_login(['user_admin']);
 
 // Boundary -> Controller.
 $controller = new UAUpdateProfileC();
-$userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
-$profile = $userId > 0 ? $controller->searchProfile($userId) : null;
+$roleCode = trim((string) ($_GET['role_code'] ?? $_POST['role_code'] ?? ''));
+$profile = $roleCode !== '' ? $controller->searchProfile($roleCode) : null;
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    // Boundary -> Control: submit profile edits and then reload the same record.
+    // Boundary -> Control: submit role edits and then reload the same profile role.
     $result = $controller->updateProfile($_POST);
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
-    app_redirect('UAUpdateProfile.php', ['id' => (int) ($_POST['user_id'] ?? 0)]);
+    app_redirect('UAUpdateProfile.php', ['role_code' => (string) ($_POST['role_code'] ?? '')]);
 }
 ?>
 <!DOCTYPE html>
@@ -38,24 +38,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <h2><?= $profile !== null ? e($profile['full_name']) : 'Choose a user profile from UASearchProfile' ?></h2>
+                    <h2><?= $profile !== null ? e($profile['role_label']) : 'Choose a profile role from UASearchProfile' ?></h2>
                 </div>
             </div>
 
             <?php if ($profile !== null): ?>
                 <form method="post" class="form-grid">
-                    <input type="hidden" name="user_id" value="<?= e((string) $profile['id']) ?>">
+                    <input type="hidden" name="role_code" value="<?= e((string) $profile['role_code']) ?>">
                     <label class="field">
-                        <span>Phone</span>
-                        <input type="text" name="phone" value="<?= e($profile['phone']) ?>">
+                        <span>Role Code</span>
+                        <input type="text" value="<?= e($profile['role_code']) ?>" disabled>
                     </label>
                     <label class="field">
-                        <span>Organisation</span>
-                        <input type="text" name="organisation" value="<?= e($profile['organisation']) ?>">
-                    </label>
-                    <label class="field">
-                        <span>City</span>
-                        <input type="text" name="city" value="<?= e($profile['city']) ?>">
+                        <span>Role Name</span>
+                        <input type="text" name="role_label" value="<?= e($profile['role_label']) ?>" required>
                     </label>
                     <label class="field">
                         <span>Status</span>
@@ -64,12 +60,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                             <option value="suspended" <?= selected_if($profile['status'], 'suspended') ?>>suspended</option>
                         </select>
                     </label>
-                    <label class="field field--full">
-                        <span>Biography</span>
-                        <textarea name="biography" rows="6"><?= e($profile['biography']) ?></textarea>
-                    </label>
-                    <button type="submit" class="button button--primary">Update Profile</button>
+                    <button type="submit" class="button button--primary">Update Profile Role</button>
                 </form>
+            <?php elseif ($roleCode !== ''): ?>
+                <div class="flash flash--error">
+                    Profile role not found.
+                </div>
             <?php endif; ?>
         </section>
     </main>

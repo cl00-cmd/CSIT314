@@ -15,6 +15,7 @@ $controller = new UASuspendProfileC();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     // Boundary -> Control: toggle whether the selected profile role is suspended.
+    // The Boundary sends only role_code and target_status; the Controller decides the outcome.
     $result = $controller->suspendProfile(
         (string) ($_POST['role_code'] ?? ''),
         (string) ($_POST['target_status'] ?? 'suspended') === 'suspended'
@@ -26,6 +27,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 $search = trim((string) ($_GET['search'] ?? ''));
 // Boundary -> Controller -> Entity for the list/filter table:
 // Boundary/UASuspendProfile.php -> Controller/UASuspendProfileC.php -> Entity/Profile.php.
+// This table lists profile roles from profile_types, not individual user profile records.
 $profileRoles = $controller->searchProfileRoles($search);
 ?>
 <!DOCTYPE html>
@@ -66,6 +68,7 @@ $profileRoles = $controller->searchProfileRoles($search);
                                 <td><?= e($profileRole['role_label']) ?> <span class="muted">(<?= e($profileRole['role_code']) ?>)</span></td>
                                 <td><?= e($profileRole['status']) ?></td>
                                 <td>
+                                    <!-- role_code identifies the profile role to suspend/reactivate in Entity/Profile.php. -->
                                     <form method="post">
                                         <input type="hidden" name="role_code" value="<?= e($profileRole['role_code']) ?>">
                                         <input type="hidden" name="target_status" value="<?= e(($profileRole['status'] ?? '') === 'suspended' ? 'active' : 'suspended') ?>">

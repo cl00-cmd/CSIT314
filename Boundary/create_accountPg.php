@@ -21,6 +21,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
+// The account/profile status controls were removed from the Boundary form.
+// Controller/CreateAccountController.php still applies active defaults when status inputs are absent.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,6 +69,7 @@ $roles = ['user_admin', 'fund_raiser', 'donor', 'platform_manager'];
                         <?php endforeach; ?>
                     </select>
                 </label>
+                <!-- Status is controlled through the dedicated suspend pages, not during account creation. -->
                 <label class="field">
                     <span>Phone</span>
                     <input type="text" name="phone">

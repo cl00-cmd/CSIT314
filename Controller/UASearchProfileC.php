@@ -6,7 +6,7 @@ namespace App\Controller;
 use App\Entity\Profile;
 
 // BCE route:
-// Boundary/UASearchProfile.php and Boundary/UASuspendProfile.php call this Controller.
+// Boundary/UASearchProfile.php calls this Controller.
 // This Controller then calls Entity/Profile.php.
 final class UASearchProfileC
 {
@@ -20,6 +20,7 @@ final class UASearchProfileC
 
     public function searchProfile(string $keyword = ''): array
     {
-        return $this->profile->findProfile(trim($keyword));
+        // Profile management is role management: search profile_types, not user_profiles.
+        return $this->profile->findProfileRoles(trim($keyword));
     }
 }

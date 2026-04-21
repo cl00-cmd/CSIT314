@@ -23,6 +23,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 $profileController = new UACreateProfileC();
 // Boundary -> Controller -> Entity for the role dropdown:
 // Boundary/UACreateAccount.php -> Controller/UACreateProfileC.php -> Entity/Profile.php.
+// Only active profile roles are shown, because suspended roles should not be assigned to new accounts.
 $profileTypes = $profileController->listProfiles(true);
 ?>
 <!DOCTYPE html>
@@ -69,6 +70,8 @@ $profileTypes = $profileController->listProfiles(true);
                         <?php endforeach; ?>
                     </select>
                 </label>
+                <!-- Status fields are intentionally hidden from this Boundary page.
+                     The Controller defaults new account/profile records to active. -->
                 <label class="field">
                     <span>Phone</span>
                     <input type="text" name="phone">

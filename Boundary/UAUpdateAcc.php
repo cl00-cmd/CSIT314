@@ -25,6 +25,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $profileController = new UACreateProfileC();
+// Boundary -> Controller -> Entity for available role types.
+// Existing roles remain selectable here so an account can keep its current role while being edited.
 $profileTypes = $profileController->listProfiles();
 ?>
 <!DOCTYPE html>
@@ -75,6 +77,8 @@ $profileTypes = $profileController->listProfiles();
                             <?php endforeach; ?>
                         </select>
                     </label>
+                    <!-- Keep the existing account status during normal account edits.
+                         Account suspension/reactivation belongs to Boundary/UserAdminPg.php. -->
                     <input type="hidden" name="status" value="<?= e($account['status']) ?>">
                     <button type="submit" class="button button--primary">Update Account</button>
                 </form>

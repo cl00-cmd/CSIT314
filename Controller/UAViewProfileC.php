@@ -18,8 +18,13 @@ final class UAViewProfileC
         $this->profile = new Profile();
     }
 
-    public function findProfile(int $userId): ?array
+    public function findProfile(string $roleCode): ?array
     {
-        return $this->profile->getProfile($userId);
+        return $this->profile->getProfileRole($roleCode);
+    }
+
+    public function listProfiles(string $keyword = ''): array
+    {
+        return $this->profile->findProfileRoles(trim($keyword));
     }
 }
