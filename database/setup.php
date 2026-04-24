@@ -28,6 +28,14 @@ if ((int) $columnCheck->fetchColumn() === 0) {
     $pdo->exec("ALTER TABLE user_profiles ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active' AFTER biography");
 }
 
+$columnCheck->execute([
+    'table_name' => 'campaigns',
+    'column_name' => 'media',
+]);
+if ((int) $columnCheck->fetchColumn() === 0) {
+    $pdo->exec("ALTER TABLE campaigns ADD COLUMN media VARCHAR(255) NOT NULL DEFAULT '' AFTER title");
+}
+
 $tableCheck = $pdo->prepare(
     'SELECT COUNT(*) FROM information_schema.TABLES
      WHERE TABLE_SCHEMA = DATABASE()
@@ -162,10 +170,10 @@ foreach ($allUsers as $index => $user) {
 
 $campaignInsert = $pdo->prepare(
     'INSERT INTO campaigns (
-        fundraiser_user_id, category_id, title, service_type, story,
+        fundraiser_user_id, category_id, title, media, service_type, story,
         funding_goal, current_amount, status, start_date, end_date
      ) VALUES (
-        :fundraiser_user_id, :category_id, :title, :service_type, :story,
+        :fundraiser_user_id, :category_id, :title, :media, :service_type, :story,
         :funding_goal, 0, :status, :start_date, :end_date
      )'
 );
@@ -179,6 +187,7 @@ for ($i = 1; $i <= 120; $i++) {
         'fundraiser_user_id' => $userIdsByRole['fund_raiser'][array_rand($userIdsByRole['fund_raiser'])],
         'category_id' => random_int(1, 100),
         'title' => sprintf('Campaign %03d', $i),
+        'media' => 'demo-media-' . sprintf('%03d', $i),
         'service_type' => $serviceTypes[array_rand($serviceTypes)],
         'story' => 'This is a large demo fundraising activity generated for system testing, filtering, and reporting.',
         'funding_goal' => random_int(5000, 50000),

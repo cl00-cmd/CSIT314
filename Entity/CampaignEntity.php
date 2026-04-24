@@ -60,7 +60,7 @@ final class CampaignEntity
 
     public function getCampaignsByFundraiser(int $fundraiserUserId, array $filters = []): array
     {
-        $sql = "SELECT c.id, c.title, c.service_type, c.story, c.funding_goal, c.current_amount,
+        $sql = "SELECT c.id, c.title, c.media, c.service_type, c.story, c.funding_goal, c.current_amount,
                        c.status, c.start_date, c.end_date, c.created_at,
                        cat.name AS category_name, cat.id AS category_id,
                        COALESCE(v.view_count, 0) AS view_count,
@@ -85,6 +85,19 @@ final class CampaignEntity
             $sql .= ' AND c.status = :status';
             $parameters['status'] = $filters['status'];
         }
+        if (!empty($filters['keyword'])) {
+            $sql .= ' AND (
+                c.title LIKE :title_term
+                OR c.story LIKE :story_term
+                OR c.service_type LIKE :service_term
+                OR cat.name LIKE :category_term
+            )';
+            $term = '%' . $filters['keyword'] . '%';
+            $parameters['title_term'] = $term;
+            $parameters['story_term'] = $term;
+            $parameters['service_term'] = $term;
+            $parameters['category_term'] = $term;
+        }
         if (!empty($filters['service_type'])) {
             $sql .= ' AND c.service_type = :service_type';
             $parameters['service_type'] = $filters['service_type'];
@@ -108,7 +121,7 @@ final class CampaignEntity
     public function getCampaignForFundraiser(int $fundraiserUserId, int $campaignId): ?array
     {
         $statement = $this->db->prepare(
-            'SELECT id, category_id, title, service_type, story, funding_goal, current_amount,
+            'SELECT id, category_id, title, media, service_type, story, funding_goal, current_amount,
                     status, start_date, end_date
              FROM campaigns
              WHERE fundraiser_user_id = :fundraiser_user_id
@@ -127,10 +140,10 @@ final class CampaignEntity
     {
         $statement = $this->db->prepare(
             'INSERT INTO campaigns (
-                fundraiser_user_id, category_id, title, service_type, story,
+                fundraiser_user_id, category_id, title, media, service_type, story,
                 funding_goal, current_amount, status, start_date, end_date
              ) VALUES (
-                :fundraiser_user_id, :category_id, :title, :service_type, :story,
+                :fundraiser_user_id, :category_id, :title, :media, :service_type, :story,
                 :funding_goal, 0, :status, :start_date, :end_date
              )'
         );
@@ -139,6 +152,7 @@ final class CampaignEntity
             'fundraiser_user_id' => $fundraiserUserId,
             'category_id' => $data['category_id'],
             'title' => $data['title'],
+            'media' => $data['media'] ?? '',
             'service_type' => $data['service_type'],
             'story' => $data['story'],
             'funding_goal' => $data['funding_goal'],
@@ -154,6 +168,7 @@ final class CampaignEntity
             'UPDATE campaigns
              SET category_id = :category_id,
                  title = :title,
+                 media = :media,
                  service_type = :service_type,
                  story = :story,
                  funding_goal = :funding_goal,
@@ -169,12 +184,27 @@ final class CampaignEntity
             'fundraiser_user_id' => $fundraiserUserId,
             'category_id' => $data['category_id'],
             'title' => $data['title'],
+            'media' => $data['media'] ?? '',
             'service_type' => $data['service_type'],
             'story' => $data['story'],
             'funding_goal' => $data['funding_goal'],
             'status' => $data['status'],
             'start_date' => $data['start_date'],
             'end_date' => $data['end_date'] !== '' ? $data['end_date'] : null,
+        ]);
+    }
+
+    public function deleteCampaign(int $fundraiserUserId, int $campaignId): bool
+    {
+        $statement = $this->db->prepare(
+            'DELETE FROM campaigns
+             WHERE id = :campaign_id
+               AND fundraiser_user_id = :fundraiser_user_id'
+        );
+
+        return $statement->execute([
+            'campaign_id' => $campaignId,
+            'fundraiser_user_id' => $fundraiserUserId,
         ]);
     }
 

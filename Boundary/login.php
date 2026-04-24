@@ -85,6 +85,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         Run <code>database/setup.php</code> first to create the database schema and large demo dataset.
                     </p>
                 </div>
+
+                <div class="card card--soft">
+                    <strong>Role-specific BCE login</strong>
+                    <div class="action-row">
+                        <a class="button button--ghost button--small" href="UALoginAccount.php">User Admin Login</a>
+                        <a class="button button--ghost button--small" href="FRLoginAccount.php">Fund Raiser Login</a>
+                    </div>
+                </div>
             </form>
         </section>
     </main>

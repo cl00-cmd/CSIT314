@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
     fundraiser_user_id INT NOT NULL,
     category_id INT NOT NULL,
     title VARCHAR(160) NOT NULL,
+    media VARCHAR(255) NOT NULL DEFAULT '',
     service_type VARCHAR(80) NOT NULL,
     story TEXT NOT NULL,
     funding_goal DECIMAL(12, 2) NOT NULL DEFAULT 0.00,

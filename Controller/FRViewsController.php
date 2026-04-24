@@ -1,0 +1,28 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\Entity\FundraisingActivity;
+
+// BCE route:
+// Boundary/FRViewsUI.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+final class FRViewsController
+{
+    private FundraisingActivity $fundraisingActivity;
+
+    public function __construct()
+    {
+        $this->fundraisingActivity = new FundraisingActivity();
+    }
+
+    public function getViewsCount(int $fundraiserUserId, int $activityId = 0): array
+    {
+        return $this->fundraisingActivity->getViews($fundraiserUserId, $activityId);
+    }
+
+    public function retrieveViews(int $fundraiserUserId): array
+    {
+        return $this->fundraisingActivity->getViews($fundraiserUserId);
+    }
+}

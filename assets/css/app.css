@@ -75,6 +75,7 @@ code {
 
 .topbar {
     display: grid;
+    /* Keep the title, navigation, and account actions on one desktop row. */
     grid-template-columns: max-content minmax(0, 1fr) auto;
     align-items: center;
     gap: 1rem;
@@ -112,6 +113,7 @@ code {
 
 .topbar__nav {
     display: flex;
+    /* Wrap instead of showing a horizontal scrollbar when space becomes tight. */
     flex-wrap: wrap;
     justify-content: center;
     align-self: center;
