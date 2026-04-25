@@ -78,7 +78,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 </label>
 
                 <button type="submit" class="button button--primary">Login</button>
-                <p class="muted">One shared login is used for all roles. You will be redirected to the correct dashboard after signing in.</p>
             </form>
         </section>
     </main>
