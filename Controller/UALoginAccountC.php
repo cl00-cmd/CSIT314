@@ -5,9 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Account;
 
-// BCE route:
-// Boundary/UALoginAccount.php calls this Controller.
-// This Controller then calls Entity/Account.php.
+// Legacy Controller kept for reference from the earlier dedicated user admin login flow.
+// The active BCE login route is Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
 final class UALoginAccountC
 {
     private Account $account;
