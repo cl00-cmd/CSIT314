@@ -49,6 +49,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $searchQuery = trim((string) ($_GET['search'] ?? ''));
+$today = date('Y-m-d');
 $selectedActivityId = (int) ($_GET['activity_id'] ?? 0);
 $activities = $command === 'search'
     ? $searchController->searchActivity($userId, $searchQuery)
@@ -116,7 +117,7 @@ $formOptions = in_array($command, ['create', 'update'], true)
                     </label>
                     <label class="field">
                         <span>Start Date</span>
-                        <input type="date" name="start_date" required>
+                        <input type="date" name="start_date" min="<?= e($today) ?>" required>
                     </label>
                     <label class="field">
                         <span>End Date</span>

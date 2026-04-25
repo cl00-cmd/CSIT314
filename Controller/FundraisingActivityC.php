@@ -16,7 +16,7 @@ final class FundraisingActivityC
         $this->fundraisingActivity = new FundraisingActivity();
     }
 
-    public function validateDetails(array $input): array
+    public function validateDetails(array $input, bool $requireFutureStartDate = false): array
     {
         $title = trim((string) ($input['title'] ?? ''));
         $description = trim((string) ($input['description'] ?? ''));
@@ -38,6 +38,14 @@ final class FundraisingActivityC
 
         if (!in_array($status, ['active', 'paused', 'completed'], true)) {
             return ['success' => false, 'message' => 'Please select a valid status.'];
+        }
+
+        if (strtotime($startDate) === false) {
+            return ['success' => false, 'message' => 'Please enter a valid start date.'];
+        }
+
+        if ($requireFutureStartDate && $startDate < date('Y-m-d')) {
+            return ['success' => false, 'message' => 'Start date cannot be before the current date.'];
         }
 
         if ($endDate !== '' && strtotime($endDate) !== false && strtotime($startDate) !== false && strtotime($endDate) < strtotime($startDate)) {
@@ -67,7 +75,7 @@ final class FundraisingActivityC
 
     public function saveActivity(int $fundraiserUserId, array $input): array
     {
-        $validated = $this->validateDetails($input);
+        $validated = $this->validateDetails($input, true);
         if (!$validated['success']) {
             return $validated;
         }
