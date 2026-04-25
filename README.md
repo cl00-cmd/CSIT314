@@ -47,14 +47,11 @@ If you already ran an older version of this project, run `database/setup.php` ag
 
 ## Demo Data
 
-`database/setup.php` creates large sample data for live demonstration:
+`database/setup.php` creates starter sample data for local testing:
 
-- 100 users
-- 100 categories
-- 120 campaigns
-- 180+ favourites
-- 300 views
-- 220 donations
+- 4 demo users
+- 6 categories
+- 3 campaigns, including completed history records
 
 ## Notes
 

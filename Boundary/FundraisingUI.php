@@ -132,32 +132,37 @@ $formOptions = in_array($command, ['create', 'update'], true)
                     <div>
                         <h2>View fundraising activity</h2>
                     </div>
+                    <?php if ($selectedActivity !== null): ?>
+                        <a class="button button--ghost" href="FundraisingUI.php?command=view">Back to Activities</a>
+                    <?php endif; ?>
                 </div>
 
-                <div class="table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Activity</th>
-                                <th>Service</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($activities as $activity): ?>
+                <?php if ($selectedActivity === null): ?>
+                    <div class="table-shell">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><?= e($activity['title']) ?></td>
-                                    <td><?= e($activity['service_type']) ?></td>
-                                    <td><?= e($activity['status']) ?></td>
-                                    <td>
-                                        <a class="button button--ghost button--small" href="FundraisingUI.php?command=view&activity_id=<?= e((string) $activity['id']) ?>">Display Details</a>
-                                    </td>
+                                    <th>Activity</th>
+                                    <th>Service</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($activities as $activity): ?>
+                                    <tr>
+                                        <td><?= e($activity['title']) ?></td>
+                                        <td><?= e($activity['service_type']) ?></td>
+                                        <td><?= e($activity['status']) ?></td>
+                                        <td>
+                                            <a class="button button--ghost button--small" href="FundraisingUI.php?command=view&activity_id=<?= e((string) $activity['id']) ?>">Display Details</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($selectedActivity !== null): ?>
                     <div class="layout-grid">
@@ -178,30 +183,35 @@ $formOptions = in_array($command, ['create', 'update'], true)
                     <div>
                         <h2>Update fundraising activity</h2>
                     </div>
-                    <div class="table-shell">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Activity</th>
-                                    <th>Service</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($activities as $activity): ?>
+                    <?php if ($selectedActivity !== null): ?>
+                        <a class="button button--ghost" href="FundraisingUI.php?command=update">Back to Activities</a>
+                    <?php endif; ?>
+                    <?php if ($selectedActivity === null): ?>
+                        <div class="table-shell">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td><?= e($activity['title']) ?></td>
-                                        <td><?= e($activity['service_type']) ?></td>
-                                        <td><?= e($activity['status']) ?></td>
-                                        <td>
-                                            <a class="button button--ghost button--small" href="FundraisingUI.php?command=update&activity_id=<?= e((string) $activity['id']) ?>">Edit Activity</a>
-                                        </td>
+                                        <th>Activity</th>
+                                        <th>Service</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($activities as $activity): ?>
+                                        <tr>
+                                            <td><?= e($activity['title']) ?></td>
+                                            <td><?= e($activity['service_type']) ?></td>
+                                            <td><?= e($activity['status']) ?></td>
+                                            <td>
+                                                <a class="button button--ghost button--small" href="FundraisingUI.php?command=update&activity_id=<?= e((string) $activity['id']) ?>">Edit Activity</a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($selectedActivity !== null): ?>

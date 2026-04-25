@@ -15,8 +15,7 @@ function fundraiser_nav_items(): array
         'search' => ['path' => 'FundraisingUI.php?command=search', 'label' => 'Search Activity'],
         'views' => ['path' => 'FRViewsUI.php', 'label' => 'View Count'],
         'shortlists' => ['path' => 'FRshortlistUI.php', 'label' => 'Shortlists'],
-        'history_service' => ['path' => 'FRHistorySearchUI.php', 'label' => 'History by Service'],
-        'history_date' => ['path' => 'FRHistoryDateSearchUI.php', 'label' => 'History by Date'],
+        'history' => ['path' => 'FRHistorySearchUI.php', 'label' => 'History'],
     ];
 }
 

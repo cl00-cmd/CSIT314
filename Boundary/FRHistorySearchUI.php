@@ -13,9 +13,11 @@ require_login(['fund_raiser']);
 $user = current_user();
 $controller = new FRHistorySearchController();
 $serviceType = trim((string) ($_GET['service_type'] ?? ''));
-$validation = $controller->validateCriteria($serviceType);
+$fromDate = trim((string) ($_GET['from'] ?? ''));
+$toDate = trim((string) ($_GET['to'] ?? ''));
+$validation = $controller->validateCriteria($serviceType, $fromDate, $toDate);
 $history = $validation['success']
-    ? $controller->searchHistory((int) $user['id'], $serviceType)
+    ? $controller->searchHistory((int) $user['id'], $serviceType, $fromDate, $toDate)
     : [];
 ?>
 <!DOCTYPE html>
@@ -23,11 +25,11 @@ $history = $validation['success']
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FRHistorySearchUI</title>
+    <title>Fundraising History</title>
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
-    <?php render_fundraiser_topbar('FRHistorySearchUI', 'history_service'); ?>
+    <?php render_fundraiser_topbar('Fundraising History', 'history'); ?>
     <main class="page-shell">
         <?php render_fundraiser_flash_if_any(); ?>
 
@@ -38,7 +40,7 @@ $history = $validation['success']
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <h2>Search completed fundraising activity history by services</h2>
+                    <h2>View completed fundraising activity history</h2>
                 </div>
                 <form method="get" class="inline-filters">
                     <select name="service_type">
@@ -47,7 +49,10 @@ $history = $validation['success']
                             <option value="<?= e($service) ?>" <?= selected_if($serviceType, $service) ?>><?= e($service) ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <input type="date" name="from" value="<?= e($fromDate) ?>" aria-label="From date">
+                    <input type="date" name="to" value="<?= e($toDate) ?>" aria-label="To date">
                     <button type="submit" class="button button--ghost">Search</button>
+                    <a class="button button--ghost" href="FRHistorySearchUI.php">Clear</a>
                 </form>
             </div>
 
@@ -58,6 +63,7 @@ $history = $validation['success']
                             <th>Activity</th>
                             <th>Service</th>
                             <th>Status</th>
+                            <th>Raised</th>
                             <th>Completed Date</th>
                         </tr>
                     </thead>
@@ -67,9 +73,15 @@ $history = $validation['success']
                                 <td><?= e($activity['title']) ?></td>
                                 <td><?= e($activity['service_type']) ?></td>
                                 <td><?= e($activity['status']) ?></td>
+                                <td><?= e(format_currency($activity['current_amount'])) ?></td>
                                 <td><?= e(format_date($activity['end_date'] ?? $activity['created_at'])) ?></td>
                             </tr>
                         <?php endforeach; ?>
+                        <?php if ($history === []): ?>
+                            <tr>
+                                <td colspan="5">No completed fundraising history found.</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

@@ -96,16 +96,24 @@ final class FundraisingActivity
 
     public function getCompletedDetailsByService(int $fundraiserUserId, string $serviceType = ''): array
     {
-        return $this->listDetails($fundraiserUserId, [
-            'status' => 'completed',
-            'service_type' => $serviceType,
-        ]);
+        return $this->getCompletedHistory($fundraiserUserId, $serviceType);
     }
 
     public function getCompletedDetailsByDate(int $fundraiserUserId, string $fromDate = '', string $toDate = ''): array
     {
+        return $this->getCompletedHistory($fundraiserUserId, '', $fromDate, $toDate);
+    }
+
+    public function getCompletedHistory(
+        int $fundraiserUserId,
+        string $serviceType = '',
+        string $fromDate = '',
+        string $toDate = ''
+    ): array
+    {
         return $this->listDetails($fundraiserUserId, [
             'status' => 'completed',
+            'service_type' => $serviceType,
             'from' => $fromDate,
             'to' => $toDate,
         ]);
