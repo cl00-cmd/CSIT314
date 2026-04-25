@@ -8,6 +8,7 @@ use App\Controller\FRshortlistController;
 
 // BCE route:
 // Boundary/FRshortlistUI.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
+// This Boundary loads the shortlist counts for each Fund Raiser activity.
 require_login(['fund_raiser']);
 
 $user = current_user();

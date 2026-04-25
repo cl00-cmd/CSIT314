@@ -11,9 +11,12 @@ use App\Controller\FundraisingSelectorC;
 use App\Controller\FundraisingViewC;
 
 // BCE route:
-// Boundary/FundraisingUI.php -> Controller/FundraisingActivityC.php / FundraisingViewC.php
-// / FundraisingEditC.php / FundraisingSelectorC.php / FundraisingSearchC.php
-// -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingActivityC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingViewC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingEditC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingSelectorC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// This Boundary handles the Fund Raiser create, view, update, delete, and search flows.
 require_login(['fund_raiser']);
 
 $user = current_user();

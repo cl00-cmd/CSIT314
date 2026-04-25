@@ -9,8 +9,12 @@ use App\Controller\FRViewsController;
 use App\Controller\FRshortlistController;
 use App\Controller\FundraisingSearchC;
 
-// Dashboard command page for Fund Raiser BCE boundaries.
-// It keeps the commands together in the same style as the User Admin dashboard.
+// BCE route:
+// Boundary/fundraiser_dashboard.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
+// This Boundary loads the Fund Raiser dashboard summary cards and recent activity table.
 require_login(['fund_raiser']);
 
 $user = current_user();
@@ -44,7 +48,7 @@ $activeCount = count(array_filter($activities, static fn (array $activity): bool
     <main class="page-shell">
         <?php render_fundraiser_flash_if_any(); ?>
 
-        <section class="stats-grid">
+        <section class="stats-grid stats-grid--five">
             <article class="stat-card">
                 <span>Total Activities</span>
                 <strong><?= e((string) count($activities)) ?></strong>

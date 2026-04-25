@@ -7,8 +7,8 @@ namespace App\Entity;
 // Controller/UACreateAccountC.php -> Entity/Account.php,
 // Controller/UASearchAccController.php -> Entity/Account.php,
 // Controller/UAViewAccC.php -> Entity/Account.php,
-// Controller/UAUpdateAccController.php -> Entity/Account.php,
-// Controller/UALoginAccountC.php -> Entity/Account.php.
+// Controller/UAUpdateAccController.php -> Entity/Account.php.
+// Shared login now uses Controller/LoginController.php -> Entity/UserEntity.php instead of the older dedicated admin login flow.
 final class Account
 {
     private UserAccountEntity $accountEntity;

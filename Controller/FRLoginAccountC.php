@@ -6,7 +6,8 @@ namespace App\Controller;
 use App\Entity\Fundraiser;
 
 // BCE route:
-// Boundary/FRLoginAccount.php -> Controller/FRLoginAccountC.php -> Entity/Fundraiser.php.
+// Boundary/FRLoginAccount.php -> Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
+// This older Fund Raiser Controller is now legacy-only because login is handled by the shared login flow.
 final class FRLoginAccountC
 {
     private Fundraiser $fundraiser;

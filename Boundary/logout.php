@@ -5,7 +5,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 // Boundary-only exit flow:
 // Boundary/logout.php clears the session and redirects to Boundary/login.php.
-// No Controller or Entity is needed because no database action is performed.
+// All roles use this shared logout Boundary. No Controller or Entity is needed because no database action is performed.
 $_SESSION = [];
 if (session_status() === PHP_SESSION_ACTIVE) {
     session_destroy();

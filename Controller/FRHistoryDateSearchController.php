@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FRHistoryDateSearchUI.php -> Controller/FRHistoryDateSearchController.php -> Entity/FundraisingActivity.php.
+// This Controller validates the date range before reading Fund Raiser history data from the Entity.
 final class FRHistoryDateSearchController
 {
     private FundraisingActivity $fundraisingActivity;

@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
-// Shared helpers for the Fund Raiser boundaries so the BCE pages use one command-style navigation.
+// BCE note:
+// This file is a shared Fund Raiser Boundary helper used by
+// Boundary/fundraiser_dashboard.php, Boundary/FundraisingUI.php,
+// Boundary/FRViewsUI.php, Boundary/FRshortlistUI.php, and Boundary/FRHistorySearchUI.php.
+// It builds the Fund Raiser navigation and points logout to Boundary/logout.php.
 function fundraiser_nav_items(): array
 {
     return [
@@ -33,7 +37,7 @@ function render_fundraiser_topbar(string $title, string $activeKey): void
         </nav>
         <div class="topbar__actions">
             <span class="pill"><?= e($user['full_name'] ?? 'Fund Raiser') ?></span>
-            <a class="button button--ghost" href="FRLogoutUI.php">Logout</a>
+            <a class="button button--ghost" href="logout.php">Logout</a>
         </div>
     </header>
     <?php

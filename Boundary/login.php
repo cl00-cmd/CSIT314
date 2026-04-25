@@ -7,7 +7,7 @@ use App\Controller\LoginController;
 
 // BCE route:
 // Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
-// This Boundary collects the username/password and sends them to the Controller.
+// This shared Boundary handles login for every role and redirects to the correct dashboard after authentication.
 if (current_user() !== null) {
     redirect_to_dashboard_for_role((string) current_user()['role']);
 }
@@ -78,21 +78,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 </label>
 
                 <button type="submit" class="button button--primary">Login</button>
-
-                <div class="card card--soft">
-                    <strong>Demo setup note</strong>
-                    <p class="muted">
-                        Run <code>database/setup.php</code> first to create the database schema and large demo dataset.
-                    </p>
-                </div>
-
-                <div class="card card--soft">
-                    <strong>Role-specific BCE login</strong>
-                    <div class="action-row">
-                        <a class="button button--ghost button--small" href="UALoginAccount.php">User Admin Login</a>
-                        <a class="button button--ghost button--small" href="FRLoginAccount.php">Fund Raiser Login</a>
-                    </div>
-                </div>
+                <p class="muted">One shared login is used for all roles. You will be redirected to the correct dashboard after signing in.</p>
             </form>
         </section>
     </main>

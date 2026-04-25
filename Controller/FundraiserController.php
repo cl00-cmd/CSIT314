@@ -7,8 +7,9 @@ use App\Entity\CampaignEntity;
 use App\Entity\CategoryEntity;
 
 // BCE route:
-// Boundary/fundraiser_dashboard.php calls this Controller.
-// This Controller calls Entity/CampaignEntity.php and Entity/CategoryEntity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FundraiserController.php -> Entity/CampaignEntity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FundraiserController.php -> Entity/CategoryEntity.php.
+// This older Fund Raiser Controller gathers dashboard, campaign, and category data.
 final class FundraiserController
 {
     public const SERVICE_TYPES = [

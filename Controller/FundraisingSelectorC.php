@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FundraisingUI.php -> Controller/FundraisingSelectorC.php -> Entity/FundraisingActivity.php.
+// This Controller validates and deletes a Fund Raiser activity.
 final class FundraisingSelectorC
 {
     private FundraisingActivity $fundraisingActivity;

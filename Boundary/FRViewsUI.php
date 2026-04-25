@@ -8,6 +8,7 @@ use App\Controller\FRViewsController;
 
 // BCE route:
 // Boundary/FRViewsUI.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+// This Boundary loads the view counts for each Fund Raiser activity.
 require_login(['fund_raiser']);
 
 $user = current_user();

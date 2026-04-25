@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FundraisingUI.php -> Controller/FundraisingEditC.php -> Entity/FundraisingActivity.php.
+// This Controller validates and updates an existing Fund Raiser activity.
 final class FundraisingEditC
 {
     private FundraisingActivity $fundraisingActivity;

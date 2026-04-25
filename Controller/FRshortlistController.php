@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FRshortlistUI.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
+// This Controller reads shortlist totals for the Fund Raiser pages.
 final class FRshortlistController
 {
     private FundraisingActivity $fundraisingActivity;

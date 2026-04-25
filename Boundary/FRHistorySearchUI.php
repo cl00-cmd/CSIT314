@@ -8,6 +8,7 @@ use App\Controller\FRHistorySearchController;
 
 // BCE route:
 // Boundary/FRHistorySearchUI.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
+// This Boundary shows completed Fund Raiser history and passes service/date filters to the Controller.
 require_login(['fund_raiser']);
 
 $user = current_user();

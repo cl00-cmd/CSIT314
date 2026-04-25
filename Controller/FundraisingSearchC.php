@@ -7,6 +7,8 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FundraisingUI.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// This Controller filters Fund Raiser activities for search and dashboard listing.
 final class FundraisingSearchC
 {
     private FundraisingActivity $fundraisingActivity;

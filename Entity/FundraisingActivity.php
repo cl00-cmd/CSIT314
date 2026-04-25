@@ -3,12 +3,21 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-// BCE entity for the Fund Raiser sequences:
-// Controller/FundraisingActivityC.php, Controller/FundraisingViewC.php,
-// Controller/FundraisingEditC.php, Controller/FundraisingSelectorC.php,
-// Controller/FundraisingSearchC.php, Controller/FRViewsController.php,
-// Controller/FRshortlistController.php, Controller/FRHistorySearchController.php,
-// and Controller/FRHistoryDateSearchController.php all call this Entity.
+// BCE route:
+// Boundary/FundraisingUI.php -> Controller/FundraisingActivityC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingViewC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingEditC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingSelectorC.php -> Entity/FundraisingActivity.php.
+// Boundary/FundraisingUI.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FundraisingSearchC.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
+// Boundary/fundraiser_dashboard.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
+// Boundary/FRViewsUI.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+// Boundary/FRshortlistUI.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
+// Boundary/FRHistorySearchUI.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
+// Boundary/FRHistoryDateSearchUI.php -> Controller/FRHistoryDateSearchController.php -> Entity/FundraisingActivity.php.
+// This Entity stores and retrieves the main Fund Raiser activity data used across those flows.
 final class FundraisingActivity
 {
     public const SERVICE_TYPES = [

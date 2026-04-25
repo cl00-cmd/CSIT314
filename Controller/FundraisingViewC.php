@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FundraisingUI.php -> Controller/FundraisingViewC.php -> Entity/FundraisingActivity.php.
+// This Controller loads Fund Raiser activity lists and single activity details.
 final class FundraisingViewC
 {
     private FundraisingActivity $fundraisingActivity;

@@ -5,6 +5,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 // BCE route:
 // Boundary/FRHistoryDateSearchUI.php -> Controller/FRHistoryDateSearchController.php -> Entity/FundraisingActivity.php.
+// This Boundary only collects the date filters, then redirects to Boundary/FRHistorySearchUI.php to show the results.
 require_login(['fund_raiser']);
 
 $query = [];

@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FRHistorySearchUI.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
+// This Controller validates the search filters before reading completed Fund Raiser history from the Entity.
 final class FRHistorySearchController
 {
     private FundraisingActivity $fundraisingActivity;

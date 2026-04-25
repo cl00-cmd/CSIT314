@@ -7,6 +7,7 @@ use App\Entity\FundraisingActivity;
 
 // BCE route:
 // Boundary/FRViewsUI.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
+// This Controller reads view totals for the Fund Raiser pages.
 final class FRViewsController
 {
     private FundraisingActivity $fundraisingActivity;

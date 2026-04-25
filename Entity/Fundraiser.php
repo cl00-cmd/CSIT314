@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-// BCE entity for the Fund Raiser login sequence:
-// Controller/FRLoginAccountC.php -> Entity/Fundraiser.php.
+// BCE route:
+// Boundary/FRLoginAccount.php -> Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
+// This older Fundraiser Entity wrapper is legacy-only because the shared login flow now uses Entity/UserEntity.php directly.
 final class Fundraiser
 {
     private UserEntity $userEntity;

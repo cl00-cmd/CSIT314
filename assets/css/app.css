@@ -247,6 +247,10 @@ code {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.stats-grid--five {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .layout-grid,
 .detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -395,6 +399,12 @@ th {
     background: var(--error-bg);
     border-color: #f2c4ca;
     color: var(--danger);
+}
+
+@media (max-width: 1280px) {
+    .stats-grid--five {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 980px) {
