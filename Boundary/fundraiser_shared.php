@@ -9,9 +9,6 @@ function fundraiser_nav_items(): array
     return [
         'dashboard' => ['path' => 'fundraiser_dashboard.php', 'label' => 'Dashboard'],
         'create' => ['path' => 'FundraisingUI.php?command=create', 'label' => 'Create Activity'],
-        'view' => ['path' => 'FundraisingUI.php?command=view', 'label' => 'View Activity'],
-        'update' => ['path' => 'FundraisingUI.php?command=update', 'label' => 'Update Activity'],
-        'delete' => ['path' => 'FundraisingUI.php?command=delete', 'label' => 'Delete Activity'],
         'search' => ['path' => 'FundraisingUI.php?command=search', 'label' => 'Search Activity'],
         'views' => ['path' => 'FRViewsUI.php', 'label' => 'View Count'],
         'shortlists' => ['path' => 'FRshortlistUI.php', 'label' => 'Shortlists'],

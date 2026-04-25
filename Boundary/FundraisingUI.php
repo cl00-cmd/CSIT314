@@ -285,36 +285,25 @@ $formOptions = in_array($command, ['create', 'update'], true)
                     <div>
                         <h2>Delete fundraising activity</h2>
                     </div>
+                    <a class="button button--ghost" href="FundraisingUI.php?command=search">Back to Search</a>
                 </div>
 
-                <div class="table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Activity</th>
-                                <th>Service</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($activities as $activity): ?>
-                                <tr>
-                                    <td><?= e($activity['title']) ?></td>
-                                    <td><?= e($activity['service_type']) ?></td>
-                                    <td><?= e($activity['status']) ?></td>
-                                    <td>
-                                        <form method="post">
-                                            <input type="hidden" name="command" value="delete">
-                                            <input type="hidden" name="activity_id" value="<?= e((string) $activity['id']) ?>">
-                                            <button type="submit" class="button button--primary button--small">Confirm Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <?php if ($selectedActivity !== null): ?>
+                    <article class="card card--soft">
+                        <h3><?= e($selectedActivity['title']) ?></h3>
+                        <p><?= e($selectedActivity['story']) ?></p>
+                        <p><strong>Goal Amount:</strong> <?= e(format_currency($selectedActivity['funding_goal'])) ?></p>
+                        <p><strong>Service Type:</strong> <?= e($selectedActivity['service_type']) ?></p>
+                        <p><strong>Status:</strong> <?= e($selectedActivity['status']) ?></p>
+                        <form method="post" class="action-row">
+                            <input type="hidden" name="command" value="delete">
+                            <input type="hidden" name="activity_id" value="<?= e((string) $selectedActivity['id']) ?>">
+                            <button type="submit" class="button button--primary">Confirm Delete</button>
+                        </form>
+                    </article>
+                <?php else: ?>
+                    <div class="flash flash--error">Choose a fundraising activity from Search Activity before deleting it.</div>
+                <?php endif; ?>
             </section>
         <?php else: ?>
             <section class="panel">
