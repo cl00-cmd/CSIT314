@@ -23,7 +23,7 @@ final class DonationEntity
         $this->db->beginTransaction();
 
         $campaignStatement = $this->db->prepare(
-            'SELECT id, status
+            'SELECT id, status, funding_goal, current_amount, end_date
              FROM campaigns
              WHERE id = :campaign_id
              LIMIT 1
@@ -51,14 +51,26 @@ final class DonationEntity
             'message' => $message,
         ]);
 
+        $newCurrentAmount = (float) $campaign['current_amount'] + $amount;
+        $newStatus = (string) $campaign['status'];
+        $newEndDate = $campaign['end_date'];
+        if ($newStatus === 'active' && $newCurrentAmount >= (float) $campaign['funding_goal']) {
+            $newStatus = 'completed';
+            $newEndDate = $newEndDate ?: date('Y-m-d');
+        }
+
         $updateStatement = $this->db->prepare(
             'UPDATE campaigns
-             SET current_amount = current_amount + :amount
+             SET current_amount = :current_amount,
+                 status = :status,
+                 end_date = :end_date
              WHERE id = :campaign_id'
         );
         $updateStatement->execute([
             'campaign_id' => $campaignId,
-            'amount' => $amount,
+            'current_amount' => $newCurrentAmount,
+            'status' => $newStatus,
+            'end_date' => $newEndDate,
         ]);
 
         $this->db->commit();
