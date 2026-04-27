@@ -7,7 +7,7 @@ use App\Config\Database;
 use PDO;
 
 // Entity layer for fundraising activity/campaign data.
-// Called by Controller/FundraiserController.php and Controller/DonorController.php.
+// Called by Fund Raiser Controllers and Donor BCE Controllers.
 final class CampaignEntity
 {
     private PDO $db;
@@ -269,19 +269,47 @@ final class CampaignEntity
         return $statement->fetchAll();
     }
 
-    public function getFavouriteCampaigns(int $donorUserId): array
+    public function getFavouriteCampaigns(int $donorUserId, array $filters = []): array
     {
-        $statement = $this->db->prepare(
-            "SELECT c.id, c.title, c.service_type, c.funding_goal, c.current_amount, c.status,
-                    cat.name AS category_name, u.full_name AS fundraiser_name, f.created_at
+        $sql = "SELECT c.id, c.title, c.service_type, c.funding_goal, c.current_amount, c.status,
+                    cat.name AS category_name, u.full_name AS fundraiser_name, f.created_at,
+                    COALESCE(v.view_count, 0) AS view_count,
+                    COALESCE(s.shortlist_count, 0) AS shortlist_count
              FROM favourites f
              INNER JOIN campaigns c ON c.id = f.campaign_id
              INNER JOIN categories cat ON cat.id = c.category_id
              INNER JOIN users u ON u.id = c.fundraiser_user_id
-             WHERE f.donor_user_id = :donor_user_id
-             ORDER BY f.created_at DESC"
-        );
-        $statement->execute(['donor_user_id' => $donorUserId]);
+             LEFT JOIN (
+                SELECT campaign_id, COUNT(*) AS view_count
+                FROM campaign_views
+                GROUP BY campaign_id
+             ) v ON v.campaign_id = c.id
+             LEFT JOIN (
+                SELECT campaign_id, COUNT(*) AS shortlist_count
+                FROM favourites
+                GROUP BY campaign_id
+             ) s ON s.campaign_id = c.id
+             WHERE f.donor_user_id = :donor_user_id";
+
+        $parameters = ['donor_user_id' => $donorUserId];
+
+        if (!empty($filters['favourite_search'])) {
+            $sql .= ' AND (
+                c.title LIKE :favourite_title_term
+                OR c.service_type LIKE :favourite_service_term
+                OR cat.name LIKE :favourite_category_term
+                OR u.full_name LIKE :favourite_fundraiser_term
+            )';
+            $term = '%' . $filters['favourite_search'] . '%';
+            $parameters['favourite_title_term'] = $term;
+            $parameters['favourite_service_term'] = $term;
+            $parameters['favourite_category_term'] = $term;
+            $parameters['favourite_fundraiser_term'] = $term;
+        }
+
+        $sql .= ' ORDER BY f.created_at DESC';
+        $statement = $this->db->prepare($sql);
+        $statement->execute($parameters);
 
         return $statement->fetchAll();
     }

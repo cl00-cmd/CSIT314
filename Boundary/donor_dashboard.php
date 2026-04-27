@@ -1,46 +1,36 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/donor_shared.php';
 
-use App\Controller\DonorController;
+use App\Controller\DActivityC;
+use App\Controller\DSearchFavouriteC;
+use App\Controller\DonationHistoryC;
+use App\Entity\DonationEntity;
 
 // BCE route:
-// Boundary/donor_dashboard.php -> Controller/DonorController.php
-// -> Entity/CampaignEntity.php, Entity/CategoryEntity.php, Entity/DonationEntity.php.
-// This Boundary handles donor form input and sends all work to the Controller.
+// Boundary/donor_dashboard.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
+// Boundary/donor_dashboard.php -> Controller/DSearchFavouriteC.php -> Entity/FavouriteList.php.
+// Boundary/donor_dashboard.php -> Controller/DonationHistoryC.php -> Entity/Donation.php.
+// This Boundary shows the Donor overall summary and links each action to its own BCE page.
 require_login(['donor']);
 
-// Boundary -> Controller.
-$controller = new DonorController();
 $user = current_user();
 $userId = (int) $user['id'];
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    $action = (string) ($_POST['action'] ?? '');
-    $campaignId = (int) ($_POST['campaign_id'] ?? 0);
+// Boundary -> Controller.
+$activityController = new DActivityC();
+$favouriteController = new DSearchFavouriteC();
+$historyController = new DonationHistoryC();
+$donationEntity = new DonationEntity();
 
-    $result = match ($action) {
-        'save_favourite' => $controller->saveFavourite($userId, $campaignId),
-        'remove_favourite' => $controller->removeFavourite($userId, $campaignId),
-        'donate' => $controller->donate($userId, $_POST),
-        default => ['success' => false, 'message' => 'Unknown action.'],
-    };
-
-    set_flash($result['success'] ? 'success' : 'error', $result['message']);
-    app_redirect('donor_dashboard.php', $campaignId > 0 ? ['campaign_id' => $campaignId] : []);
-}
-
-$filters = [
-    'search' => trim((string) ($_GET['search'] ?? '')),
-    'category_id' => (string) ($_GET['category_id'] ?? ''),
-    'from' => (string) ($_GET['from'] ?? ''),
-    'to' => (string) ($_GET['to'] ?? ''),
-];
-
-$selectedCampaign = isset($_GET['campaign_id']) ? $controller->viewCampaign($userId, (int) $_GET['campaign_id']) : null;
-$dashboard = $controller->getDashboardData($userId, $filters);
-$flash = pull_flash();
+$activities = $activityController->searchActivity($userId);
+$favourites = $favouriteController->searchFavourite($userId);
+$history = $historyController->displayResults($userId);
+$summary = $donationEntity->getDonorSummary($userId);
+$recentActivities = array_slice($activities, 0, 4);
+$recentFavourites = array_slice($favourites, 0, 4);
+$recentHistory = array_slice($history, 0, 5);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,216 +41,128 @@ $flash = pull_flash();
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
-    <header class="topbar">
-        <div>
-            <p class="eyebrow">Donor Workspace</p>
-            <h1>Search, save, and donate</h1>
-        </div>
-        <nav class="topbar__nav">
-            <span class="pill">Signed in as <?= e($user['full_name']) ?></span>
-            <a class="button button--ghost" href="logout.php">Logout</a>
-        </nav>
-    </header>
+    <?php render_donor_topbar('Donor Dashboard', 'dashboard'); ?>
 
-    <main class="page-shell">
-        <?php if ($flash !== null): ?>
-            <div class="<?= e(flash_class($flash['type'] ?? null)) ?>">
-                <?= e($flash['message'] ?? '') ?>
-            </div>
-        <?php endif; ?>
+    <main class="page-shell donor-shell">
+        <?php render_donor_flash_if_any(); ?>
 
-        <section class="stats-grid">
+        <section class="stats-grid donor-stats">
             <article class="stat-card">
-                <span>Saved Campaigns</span>
-                <strong><?= e((string) $dashboard['summary']['favourite_count']) ?></strong>
+                <span>Available Activities</span>
+                <strong><?= e((string) count($activities)) ?></strong>
+            </article>
+            <article class="stat-card">
+                <span>Favourite List</span>
+                <strong><?= e((string) count($favourites)) ?></strong>
             </article>
             <article class="stat-card">
                 <span>Total Donations</span>
-                <strong><?= e((string) $dashboard['summary']['donation_count']) ?></strong>
+                <strong><?= e((string) ($summary['donation_count'] ?? 0)) ?></strong>
             </article>
             <article class="stat-card">
                 <span>Donation Value</span>
-                <strong><?= e(format_currency($dashboard['summary']['donation_amount'])) ?></strong>
+                <strong><?= e(format_currency($summary['total_amount'] ?? 0)) ?></strong>
             </article>
         </section>
 
-        <section class="panel">
-            <div class="panel__header panel__header--stack">
-                <div>
-                    <p class="section-label">Discover Campaigns</p>
-                    <h2>Search and shortlist fundraising activities</h2>
-                </div>
-
-                <form method="get" class="inline-filters">
-                    <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Search title, story, service">
-                    <select name="category_id">
-                        <option value="">All categories</option>
-                        <?php foreach ($dashboard['categories'] as $category): ?>
-                            <option value="<?= e((string) $category['id']) ?>" <?= selected_if($filters['category_id'], $category['id']) ?>>
-                                <?= e($category['name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <input type="date" name="from" value="<?= e($filters['from']) ?>">
-                    <input type="date" name="to" value="<?= e($filters['to']) ?>">
-                    <button type="submit" class="button button--ghost">Filter</button>
-                </form>
-            </div>
-
-            <div class="campaign-grid">
-                <?php foreach ($dashboard['campaigns'] as $campaign): ?>
-                    <article class="campaign-card">
-                        <div class="campaign-card__top">
-                            <div>
-                                <h3><?= e($campaign['title']) ?></h3>
-                                <p class="muted"><?= e($campaign['fundraiser_name']) ?> · <?= e($campaign['category_name']) ?></p>
-                            </div>
-                            <span class="pill"><?= e($campaign['status']) ?></span>
-                        </div>
-                        <p><?= e(substr($campaign['story'], 0, 160)) ?>...</p>
-                        <div class="campaign-meta">
-                            <span>Views: <?= e((string) $campaign['view_count']) ?></span>
-                            <span>Shortlists: <?= e((string) $campaign['shortlist_count']) ?></span>
-                            <span>Raised: <?= e(format_currency($campaign['current_amount'])) ?></span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress__bar" style="width: <?= e((string) progress_percent($campaign)) ?>%"></div>
-                        </div>
-                        <div class="action-row">
-                            <a class="button button--ghost button--small" href="?campaign_id=<?= e((string) $campaign['id']) ?>">View</a>
-                            <?php if ((int) $campaign['is_favourite'] === 1): ?>
-                                <form method="post">
-                                    <input type="hidden" name="action" value="remove_favourite">
-                                    <input type="hidden" name="campaign_id" value="<?= e((string) $campaign['id']) ?>">
-                                    <button type="submit" class="button button--ghost button--small">Remove Favourite</button>
-                                </form>
-                            <?php else: ?>
-                                <form method="post">
-                                    <input type="hidden" name="action" value="save_favourite">
-                                    <input type="hidden" name="campaign_id" value="<?= e((string) $campaign['id']) ?>">
-                                    <button type="submit" class="button button--primary button--small">Save Favourite</button>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        </section>
-
-        <?php if ($selectedCampaign !== null): ?>
-            <section class="panel">
+        <section class="layout-grid donor-two-column">
+            <section class="panel donor-panel">
                 <div class="panel__header">
                     <div>
-                        <p class="section-label">Campaign Details</p>
-                        <h2><?= e($selectedCampaign['title']) ?></h2>
+                        <h2>Recent fundraising activities</h2>
                     </div>
-                    <span class="pill"><?= e($selectedCampaign['status']) ?></span>
+                    <a class="button button--ghost button--small" href="DSearchUI.php">View All</a>
                 </div>
-
-                <div class="detail-grid">
-                    <div class="card card--soft">
-                        <p class="muted"><?= e($selectedCampaign['fundraiser_name']) ?> · <?= e($selectedCampaign['category_name']) ?></p>
-                        <p><?= e($selectedCampaign['story']) ?></p>
-                        <div class="campaign-meta">
-                            <span>Views: <?= e((string) $selectedCampaign['view_count']) ?></span>
-                            <span>Shortlists: <?= e((string) $selectedCampaign['shortlist_count']) ?></span>
-                            <span>Goal: <?= e(format_currency($selectedCampaign['funding_goal'])) ?></span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress__bar" style="width: <?= e((string) progress_percent($selectedCampaign)) ?>%"></div>
-                        </div>
-                    </div>
-
-                    <form method="post" class="card form-stack">
-                        <input type="hidden" name="action" value="donate">
-                        <input type="hidden" name="campaign_id" value="<?= e((string) $selectedCampaign['id']) ?>">
-
-                        <div>
-                            <p class="section-label">Donate</p>
-                            <h3>Support this campaign</h3>
-                        </div>
-
-                        <label class="field">
-                            <span>Amount</span>
-                            <input type="number" name="amount" min="1" step="0.01" required>
-                        </label>
-                        <label class="field">
-                            <span>Message</span>
-                            <textarea name="message" rows="4"></textarea>
-                        </label>
-
-                        <button type="submit" class="button button--primary">Submit Donation</button>
-                    </form>
-                </div>
-            </section>
-        <?php endif; ?>
-
-        <section class="layout-grid">
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Favourite List</p>
-                        <h2>Saved fundraising activities</h2>
-                    </div>
-                </div>
-
                 <div class="table-shell">
                     <table>
                         <thead>
                             <tr>
-                                <th>Campaign</th>
+                                <th>Activity</th>
                                 <th>Category</th>
-                                <th>Fundraiser</th>
+                                <th>Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recentActivities as $activity): ?>
+                                <tr>
+                                    <td><a href="DActivityUI.php?activity_id=<?= e((string) $activity['id']) ?>"><?= e($activity['title']) ?></a></td>
+                                    <td><?= e($activity['category_name']) ?></td>
+                                    <td><?= e((string) progress_percent($activity)) ?>%</td>
+                                </tr>
+                            <?php endforeach; ?>
+                            <?php if ($recentActivities === []): ?>
+                                <tr><td colspan="3">No fundraising activity found.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel donor-panel">
+                <div class="panel__header">
+                    <div>
+                        <h2>Recent favourite list</h2>
+                    </div>
+                    <a class="button button--ghost button--small" href="DFavouriteUI.php">View All</a>
+                </div>
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Category</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($dashboard['favourites'] as $favourite): ?>
+                            <?php foreach ($recentFavourites as $favourite): ?>
                                 <tr>
-                                    <td><?= e($favourite['title']) ?></td>
+                                    <td><a href="DViewFavouriteUI.php?activity_id=<?= e((string) $favourite['id']) ?>"><?= e($favourite['title']) ?></a></td>
                                     <td><?= e($favourite['category_name']) ?></td>
-                                    <td><?= e($favourite['fundraiser_name']) ?></td>
                                     <td><?= e($favourite['status']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
+                            <?php if ($recentFavourites === []): ?>
+                                <tr><td colspan="3">No saved fundraising activity found.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </section>
+        </section>
 
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Donation History</p>
-                        <h2>Search donation history and FSA progress</h2>
-                    </div>
+        <section class="panel donor-panel">
+            <div class="panel__header">
+                <div>
+                    <h2>Recent donation history</h2>
                 </div>
-
-                <div class="table-shell">
-                    <table>
-                        <thead>
+                <a class="button button--ghost button--small" href="DonationHistoryUI.php">View All</a>
+            </div>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($recentHistory as $donation): ?>
                             <tr>
-                                <th>Campaign</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th>Progress</th>
-                                <th>Date</th>
+                                <td><?= e($donation['campaign_title']) ?></td>
+                                <td><?= e($donation['category_name']) ?></td>
+                                <td><?= e(format_currency($donation['amount'])) ?></td>
+                                <td><?= e(format_date($donation['donated_at'])) ?></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($dashboard['history'] as $donation): ?>
-                                <tr>
-                                    <td><?= e($donation['campaign_title']) ?></td>
-                                    <td><?= e($donation['category_name']) ?></td>
-                                    <td><?= e(format_currency($donation['amount'])) ?></td>
-                                    <td><?= e((string) progress_percent($donation)) ?>%</td>
-                                    <td><?= e(format_date($donation['donated_at'])) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                        <?php endforeach; ?>
+                        <?php if ($recentHistory === []): ?>
+                            <tr><td colspan="4">No donation history found.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 </body>

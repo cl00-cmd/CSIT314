@@ -8,7 +8,7 @@ use PDO;
 use RuntimeException;
 
 // Entity layer for donation records and donor donation history.
-// Called by Controller/DonorController.php.
+// Called by Controller/DonorController.php and Controller/DonationHistoryC.php.
 final class DonationEntity
 {
     private PDO $db;

@@ -17,7 +17,11 @@ namespace App\Entity;
 // Boundary/FRshortlistUI.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
 // Boundary/FRHistorySearchUI.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
 // Boundary/FRHistoryDateSearchUI.php -> Controller/FRHistoryDateSearchController.php -> Entity/FundraisingActivity.php.
-// This Entity stores and retrieves the main Fund Raiser activity data used across those flows.
+// Boundary/DSearchUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
+// Boundary/DActivityUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
+// Boundary/DViewFavouriteUI.php -> Controller/DViewFavouriteC.php -> Entity/FundraisingActivity.php.
+// Boundary/DonorProgressUI.php -> Controller/DonorProgressC.php -> Entity/FundraisingActivity.php.
+// This Entity stores and retrieves fundraising activity data used by Fund Raiser and Donor flows.
 final class FundraisingActivity
 {
     public const SERVICE_TYPES = [
@@ -111,6 +115,22 @@ final class FundraisingActivity
     public function getCompletedDetailsByDate(int $fundraiserUserId, string $fromDate = '', string $toDate = ''): array
     {
         return $this->getCompletedHistory($fundraiserUserId, '', $fromDate, $toDate);
+    }
+
+    public function searchActivity(int $donorUserId, array $filters = []): array
+    {
+        return $this->campaignEntity->getDiscoverableCampaigns($donorUserId, $filters);
+    }
+
+    public function getActivity(int $activityId, int $donorUserId): ?array
+    {
+        $this->campaignEntity->recordView($activityId, $donorUserId);
+        return $this->campaignEntity->getCampaignDetails($activityId, $donorUserId);
+    }
+
+    public function getProgress(int $activityId, int $donorUserId): ?array
+    {
+        return $this->campaignEntity->getCampaignDetails($activityId, $donorUserId);
     }
 
     public function getCompletedHistory(

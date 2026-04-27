@@ -7,7 +7,7 @@ use App\Config\Database;
 use PDO;
 
 // Entity layer for FSA category data.
-// Called by Controller/FundraiserController.php, Controller/DonorController.php,
+// Called by Fund Raiser Controllers, Donor BCE Controllers,
 // and Controller/PlatformController.php.
 final class CategoryEntity
 {

@@ -383,6 +383,82 @@ th {
     background: linear-gradient(90deg, var(--accent), var(--primary));
 }
 
+.donor-topbar {
+    border-bottom-color: #d9e2ec;
+}
+
+.donor-shell {
+    max-width: 1480px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.donor-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.donor-panel {
+    border-radius: 14px;
+}
+
+.donor-filters {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(170px, 0.9fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto;
+    width: 100%;
+}
+
+.donor-filters--single {
+    grid-template-columns: minmax(220px, 1fr) auto;
+    max-width: 520px;
+}
+
+.donor-filters--history {
+    grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto;
+}
+
+.donor-filters input,
+.donor-filters select {
+    min-width: 0;
+}
+
+.donor-activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.donor-activity-card {
+    border-radius: 12px;
+    background: #fff;
+}
+
+.donor-detail-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+}
+
+.donor-two-column {
+    align-items: start;
+}
+
+.donor-progress {
+    display: grid;
+    gap: 1rem;
+}
+
+.donor-progress h3 {
+    margin: 0;
+}
+
+.donor-progress__numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.donor-progress__numbers strong {
+    color: var(--primary-deep);
+    font-size: 2.4rem;
+}
+
 .flash {
     padding: 0.95rem 1rem;
     border-radius: 18px;
@@ -447,6 +523,15 @@ th {
     }
 
     .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .donor-stats,
+    .donor-activity-grid,
+    .donor-detail-grid,
+    .donor-filters,
+    .donor-filters--single,
+    .donor-filters--history {
         grid-template-columns: 1fr;
     }
 }
