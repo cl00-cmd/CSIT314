@@ -20,10 +20,12 @@ final class DonationEntity
 
     public function createDonation(int $donorUserId, int $campaignId, float $amount, string $message): bool
     {
+        Database::ensureCampaignCompletionColumn();
+
         $this->db->beginTransaction();
 
         $campaignStatement = $this->db->prepare(
-            'SELECT id, status, funding_goal, current_amount, end_date
+            'SELECT id, status, funding_goal, current_amount, end_date, completed_at
              FROM campaigns
              WHERE id = :campaign_id
              LIMIT 1
@@ -53,24 +55,24 @@ final class DonationEntity
 
         $newCurrentAmount = (float) $campaign['current_amount'] + $amount;
         $newStatus = (string) $campaign['status'];
-        $newEndDate = $campaign['end_date'];
+        $newCompletedAt = $campaign['completed_at'];
         if ($newStatus === 'active' && $newCurrentAmount >= (float) $campaign['funding_goal']) {
             $newStatus = 'completed';
-            $newEndDate = $newEndDate ?: date('Y-m-d');
+            $newCompletedAt = $newCompletedAt ?: date('Y-m-d H:i:s');
         }
 
         $updateStatement = $this->db->prepare(
             'UPDATE campaigns
              SET current_amount = :current_amount,
                  status = :status,
-                 end_date = :end_date
+                 completed_at = :completed_at
              WHERE id = :campaign_id'
         );
         $updateStatement->execute([
             'campaign_id' => $campaignId,
             'current_amount' => $newCurrentAmount,
             'status' => $newStatus,
-            'end_date' => $newEndDate,
+            'completed_at' => $newCompletedAt,
         ]);
 
         $this->db->commit();

@@ -80,10 +80,10 @@ foreach ($users as [$username, $fullName, $email, $role]) {
 $campaignInsert = $pdo->prepare(
     'INSERT INTO campaigns (
         fundraiser_user_id, category_id, title, media, service_type, story,
-        funding_goal, current_amount, status, start_date, end_date
+        funding_goal, current_amount, status, start_date, end_date, completed_at
      ) VALUES (
         :fundraiser_user_id, :category_id, :title, :media, :service_type, :story,
-        :funding_goal, :current_amount, :status, :start_date, :end_date
+        :funding_goal, :current_amount, :status, :start_date, :end_date, :completed_at
      )'
 );
 
@@ -106,6 +106,7 @@ foreach ($campaigns as [$title, $categoryId, $serviceType, $status, $goal, $curr
         'status' => $status,
         'start_date' => date('Y-m-d', strtotime($startOffset)),
         'end_date' => $endOffset === null ? null : date('Y-m-d', strtotime($endOffset)),
+        'completed_at' => $status === 'completed' ? date('Y-m-d H:i:s', strtotime($endOffset ?? 'now')) : null,
     ]);
 }
 

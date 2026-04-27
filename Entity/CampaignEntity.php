@@ -60,8 +60,10 @@ final class CampaignEntity
 
     public function getCampaignsByFundraiser(int $fundraiserUserId, array $filters = []): array
     {
+        $this->ensureCompletedAtColumn();
+
         $sql = "SELECT c.id, c.title, c.media, c.service_type, c.story, c.funding_goal, c.current_amount,
-                       c.status, c.start_date, c.end_date, c.created_at,
+                       c.status, c.start_date, c.end_date, c.completed_at, c.created_at,
                        cat.name AS category_name, cat.id AS category_id,
                        COALESCE(v.view_count, 0) AS view_count,
                        COALESCE(f.shortlist_count, 0) AS shortlist_count
@@ -103,19 +105,24 @@ final class CampaignEntity
             $parameters['service_type'] = $filters['service_type'];
         }
         if (!empty($filters['from'])) {
-            $sql .= ' AND DATE(COALESCE(c.end_date, c.created_at)) >= :from_date';
+            $sql .= ' AND DATE(COALESCE(c.completed_at, c.end_date, c.created_at)) >= :from_date';
             $parameters['from_date'] = $filters['from'];
         }
         if (!empty($filters['to'])) {
-            $sql .= ' AND DATE(COALESCE(c.end_date, c.created_at)) <= :to_date';
+            $sql .= ' AND DATE(COALESCE(c.completed_at, c.end_date, c.created_at)) <= :to_date';
             $parameters['to_date'] = $filters['to'];
         }
 
-        $sql .= ' ORDER BY c.created_at DESC, c.id DESC';
+        $sql .= ' ORDER BY COALESCE(c.completed_at, c.end_date, c.created_at) DESC, c.id DESC';
         $statement = $this->db->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
+    }
+
+    private function ensureCompletedAtColumn(): void
+    {
+        Database::ensureCampaignCompletionColumn();
     }
 
     public function getCampaignForFundraiser(int $fundraiserUserId, int $campaignId): ?array

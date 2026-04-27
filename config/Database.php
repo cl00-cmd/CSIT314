@@ -85,4 +85,47 @@ final class Database
             }
         }
     }
+
+    public static function ensureCampaignCompletionColumn(): void
+    {
+        $pdo = self::getConnection();
+        $columnCheck = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = "campaigns"
+               AND COLUMN_NAME = "completed_at"'
+        );
+        $columnCheck->execute();
+        if ((int) $columnCheck->fetchColumn() === 0) {
+            $pdo->exec('ALTER TABLE campaigns ADD COLUMN completed_at DATETIME NULL AFTER end_date');
+            $pdo->exec('CREATE INDEX idx_campaigns_completed_at ON campaigns (completed_at)');
+        }
+
+        $pdo->exec(
+            'UPDATE campaigns c
+             LEFT JOIN (
+                SELECT reached.campaign_id, MIN(reached.donated_at) AS completed_at
+                FROM (
+                    SELECT d1.campaign_id, d1.id, d1.donated_at,
+                           (
+                               SELECT COALESCE(SUM(d2.amount), 0)
+                               FROM donations d2
+                               WHERE d2.campaign_id = d1.campaign_id
+                                 AND (
+                                     d2.donated_at < d1.donated_at
+                                     OR (d2.donated_at = d1.donated_at AND d2.id <= d1.id)
+                                 )
+                           ) AS amount_at_donation
+                    FROM donations d1
+                ) reached
+                INNER JOIN campaigns c2 ON c2.id = reached.campaign_id
+                WHERE reached.amount_at_donation >= c2.funding_goal
+                GROUP BY reached.campaign_id
+             ) completion ON completion.campaign_id = c.id
+             SET c.completed_at = COALESCE(completion.completed_at, c.end_date, c.created_at)
+             WHERE c.status = "completed"
+               AND c.completed_at IS NULL'
+        );
+    }
 }
