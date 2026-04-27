@@ -15,12 +15,15 @@ require_login(['donor']);
 $user = current_user();
 $userId = (int) $user['id'];
 $activityId = (int) ($_GET['activity_id'] ?? 0);
+$searchTerm = trim((string) ($_GET['search'] ?? ''));
 
 // Boundary -> Controller.
 $progressController = new DonorProgressC();
 $activityController = new DActivityC();
 
-$activities = $activityController->searchActivity($userId);
+$activities = $activityController->searchActivity($userId, [
+    'search' => $searchTerm,
+]);
 $selectedProgress = $activityId > 0 ? $progressController->getProgress($userId, $activityId) : null;
 ?>
 <!DOCTYPE html>
@@ -59,10 +62,17 @@ $selectedProgress = $activityId > 0 ? $progressController->getProgress($userId, 
         <?php endif; ?>
 
         <section class="panel donor-panel">
-            <div class="panel__header">
+            <div class="panel__header panel__header--stack">
                 <div>
                     <h2>View fundraising activity progress</h2>
                 </div>
+                <form method="get" class="inline-filters donor-filters">
+                    <input type="text" name="search" value="<?= e($searchTerm) ?>" placeholder="Search activity, fundraiser, service, or category">
+                    <button type="submit" class="button button--primary">Search</button>
+                    <?php if ($searchTerm !== ''): ?>
+                        <a class="button button--ghost" href="DonorProgressUI.php">Clear</a>
+                    <?php endif; ?>
+                </form>
             </div>
             <div class="table-shell">
                 <table>

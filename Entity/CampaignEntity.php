@@ -242,12 +242,14 @@ final class CampaignEntity
                 OR c.story LIKE :story_term
                 OR c.service_type LIKE :service_term
                 OR cat.name LIKE :category_term
+                OR u.full_name LIKE :fundraiser_term
             )';
             $term = '%' . $filters['search'] . '%';
             $parameters['title_term'] = $term;
             $parameters['story_term'] = $term;
             $parameters['service_term'] = $term;
             $parameters['category_term'] = $term;
+            $parameters['fundraiser_term'] = $term;
         }
         if (!empty($filters['category_id'])) {
             $sql .= ' AND c.category_id = :category_id';
