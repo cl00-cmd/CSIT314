@@ -59,7 +59,6 @@ $activities = $activityController->searchActivity($userId, $filters);
         <section class="panel donor-panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <p class="section-label">DSearchUI</p>
                     <h2>Search fundraising activity</h2>
                 </div>
                 <form method="get" class="inline-filters donor-filters">

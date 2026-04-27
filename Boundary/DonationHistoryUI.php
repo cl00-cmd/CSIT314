@@ -43,7 +43,6 @@ $history = $historyController->displayResults($userId, $filters);
         <section class="panel donor-panel">
             <div class="panel__header panel__header--stack">
                 <div>
-                    <p class="section-label">DonationHistoryUI</p>
                     <h2>Search donation history</h2>
                 </div>
                 <form method="get" class="inline-filters donor-filters donor-filters--history">

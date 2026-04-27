@@ -40,10 +40,9 @@ $selectedProgress = $activityId > 0 ? $progressController->getProgress($userId, 
         <?php if ($selectedProgress !== null): ?>
             <section class="panel donor-panel donor-progress-panel">
                 <div class="panel__header">
-                    <div>
-                        <p class="section-label">DonorProgressUI</p>
-                        <h2><?= e($selectedProgress['title']) ?></h2>
-                    </div>
+                <div>
+                    <h2><?= e($selectedProgress['title']) ?></h2>
+                </div>
                     <a class="button button--ghost button--small" href="DActivityUI.php?activity_id=<?= e((string) $selectedProgress['id']) ?>">View Details</a>
                 </div>
                 <div class="donor-progress">
@@ -62,7 +61,6 @@ $selectedProgress = $activityId > 0 ? $progressController->getProgress($userId, 
         <section class="panel donor-panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">DonorProgressUI</p>
                     <h2>View fundraising activity progress</h2>
                 </div>
             </div>
