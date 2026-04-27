@@ -54,7 +54,6 @@ $profileTypes = $controller->listProfiles();
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <p class="section-label">Current Roles</p>
                     <h2>Existing user profile roles</h2>
                 </div>
             </div>
