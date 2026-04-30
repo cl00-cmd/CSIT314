@@ -5,7 +5,6 @@ require_once __DIR__ . '/donor_shared.php';
 
 use App\Controller\DActivityC;
 use App\Controller\DSaveFavouriteC;
-use App\Entity\CategoryEntity;
 
 // BCE route:
 // Boundary/DSearchUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
@@ -19,7 +18,6 @@ $userId = (int) $user['id'];
 // Boundary -> Controller.
 $activityController = new DActivityC();
 $saveFavouriteController = new DSaveFavouriteC();
-$categoryEntity = new CategoryEntity();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $activityId = (int) ($_POST['activity_id'] ?? 0);
@@ -39,7 +37,7 @@ $filters = [
     'from' => (string) ($_GET['from'] ?? ''),
     'to' => (string) ($_GET['to'] ?? ''),
 ];
-$categories = $categoryEntity->getAll('', true);
+$categories = $activityController->listCategories();
 $activities = $activityController->searchActivity($userId, $filters);
 ?>
 <!DOCTYPE html>

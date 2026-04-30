@@ -17,13 +17,8 @@ final class FRViewsController
         $this->fundraisingActivity = new FundraisingActivity();
     }
 
-    public function getViewsCount(int $fundraiserUserId, int $activityId = 0): array
+    public function getViewCount(int $fundraiserUserId, int $activityId = 0): array
     {
-        return $this->fundraisingActivity->getViews($fundraiserUserId, $activityId);
-    }
-
-    public function retrieveViews(int $fundraiserUserId): array
-    {
-        return $this->fundraisingActivity->getViews($fundraiserUserId);
+        return $this->fundraisingActivity->getViewCount($fundraiserUserId, $activityId);
     }
 }

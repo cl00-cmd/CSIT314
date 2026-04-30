@@ -8,7 +8,7 @@ use PDO;
 use RuntimeException;
 
 // Entity layer for donation records and donor donation history.
-// Called by Controller/DonorController.php and Controller/DonationHistoryC.php.
+// Called through Entity/Donation.php by Donor donation and history Controllers.
 final class DonationEntity
 {
     private PDO $db;
@@ -20,12 +20,10 @@ final class DonationEntity
 
     public function createDonation(int $donorUserId, int $campaignId, float $amount, string $message): bool
     {
-        Database::ensureCampaignCompletionColumn();
-
         $this->db->beginTransaction();
 
         $campaignStatement = $this->db->prepare(
-            'SELECT id, status, funding_goal, current_amount, end_date, completed_at
+            'SELECT id, status
              FROM campaigns
              WHERE id = :campaign_id
              LIMIT 1
@@ -53,26 +51,14 @@ final class DonationEntity
             'message' => $message,
         ]);
 
-        $newCurrentAmount = (float) $campaign['current_amount'] + $amount;
-        $newStatus = (string) $campaign['status'];
-        $newCompletedAt = $campaign['completed_at'];
-        if ($newStatus === 'active' && $newCurrentAmount >= (float) $campaign['funding_goal']) {
-            $newStatus = 'completed';
-            $newCompletedAt = $newCompletedAt ?: date('Y-m-d H:i:s');
-        }
-
         $updateStatement = $this->db->prepare(
             'UPDATE campaigns
-             SET current_amount = :current_amount,
-                 status = :status,
-                 completed_at = :completed_at
+             SET current_amount = current_amount + :amount
              WHERE id = :campaign_id'
         );
         $updateStatement->execute([
             'campaign_id' => $campaignId,
-            'current_amount' => $newCurrentAmount,
-            'status' => $newStatus,
-            'completed_at' => $newCompletedAt,
+            'amount' => $amount,
         ]);
 
         $this->db->commit();

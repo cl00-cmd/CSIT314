@@ -42,4 +42,14 @@ final class DonationHistoryC
     {
         return $this->searchHistory($userId, $filters);
     }
+
+    public function listCategories(): array
+    {
+        return $this->donation->listCategories();
+    }
+
+    public function getSummary(int $userId): array
+    {
+        return $this->donation->getSummary($userId);
+    }
 }

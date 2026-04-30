@@ -46,9 +46,7 @@ final class UAUpdateAccController
                 'email' => $email,
                 'role' => (string) ($input['role'] ?? 'donor'),
                 'status' => (string) ($input['status'] ?? 'active'),
-                'password_hash' => trim((string) ($input['password'] ?? '')) !== ''
-                    ? password_hash((string) $input['password'], PASSWORD_DEFAULT)
-                    : null,
+                'password' => (string) ($input['password'] ?? ''),
             ]);
         } catch (\Throwable) {
             return ['success' => false, 'message' => 'Unable to update the user account.'];

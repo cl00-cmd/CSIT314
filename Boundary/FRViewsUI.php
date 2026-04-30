@@ -13,7 +13,7 @@ require_login(['fund_raiser']);
 
 $user = current_user();
 $controller = new FRViewsController();
-$views = $controller->retrieveViews((int) $user['id']);
+$views = $controller->getViewCount((int) $user['id']);
 $totalViews = array_sum(array_column($views, 'viewsCount'));
 ?>
 <!DOCTYPE html>

@@ -19,13 +19,11 @@ final class ReportEntity
 
     public function getSummary(string $period): array
     {
-        Database::ensureCampaignCompletionColumn();
-
         $startDate = $this->periodStartDate($period);
         $statement = $this->db->prepare(
             "SELECT
                 (SELECT COUNT(*) FROM campaigns WHERE created_at >= :start_date) AS new_campaigns,
-                (SELECT COUNT(*) FROM campaigns WHERE status = 'completed' AND COALESCE(completed_at, end_date, created_at) >= :start_date) AS completed_campaigns,
+                (SELECT COUNT(*) FROM campaigns WHERE status = 'completed' AND COALESCE(end_date, created_at) >= :start_date) AS completed_campaigns,
                 (SELECT COUNT(*) FROM donations WHERE donated_at >= :start_date) AS donations_count,
                 (SELECT COALESCE(SUM(amount), 0) FROM donations WHERE donated_at >= :start_date) AS donations_value,
                 (SELECT COUNT(*) FROM users WHERE created_at >= :start_date) AS new_users"

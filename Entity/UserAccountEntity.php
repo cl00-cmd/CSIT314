@@ -9,7 +9,7 @@ use PDO;
 // Entity layer for user account records in the users table.
 // Called by generic user-admin Controllers such as SearchUserController.php,
 // ViewUserDetailsController.php, UpdateUserController.php, SuspendAccController.php,
-// and CreateAccountController.php.
+// and by Entity/Account.php for account creation/login persistence.
 final class UserAccountEntity
 {
     private PDO $db;
@@ -87,6 +87,37 @@ final class UserAccountEntity
         ]);
 
         return (int) $this->db->lastInsertId();
+    }
+
+    public function createAccountWithProfile(array $data): bool
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $userId = $this->createAccount($data);
+
+            $profileStatement = $this->db->prepare(
+                'INSERT INTO user_profiles (user_id, phone, organisation, city, biography, status)
+                 VALUES (:user_id, :phone, :organisation, :city, :biography, :status)'
+            );
+            $profileStatement->execute([
+                'user_id' => $userId,
+                'phone' => $data['phone'] ?? '',
+                'organisation' => $data['organisation'] ?? '',
+                'city' => $data['city'] ?? '',
+                'biography' => $data['biography'] ?? '',
+                'status' => $data['profile_status'] ?? 'active',
+            ]);
+
+            $this->db->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
     public function updateAccount(int $userId, array $data): bool

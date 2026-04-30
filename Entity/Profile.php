@@ -14,18 +14,11 @@ use PDO;
 // Controller/UACreateProfileC.php -> Entity/Profile.php.
 final class Profile
 {
-    private UserProfileEntity $profileEntity;
     private PDO $db;
 
     public function __construct()
     {
-        $this->profileEntity = new UserProfileEntity();
         $this->db = Database::getConnection();
-    }
-
-    public function findProfile(string $keyword = ''): array
-    {
-        return $this->profileEntity->searchProfiles($keyword);
     }
 
     public function findProfileRoles(string $keyword = ''): array
@@ -63,21 +56,6 @@ final class Profile
         $profileRole = $statement->fetch();
 
         return $profileRole === false ? null : $profileRole;
-    }
-
-    public function getProfile(int $userId): ?array
-    {
-        return $this->profileEntity->getProfileByUserId($userId);
-    }
-
-    public function editProfile(array $profileData): bool
-    {
-        return $this->profileEntity->updateProfile((int) $profileData['user_id'], $profileData);
-    }
-
-    public function suspendProfile(int $userId, string $status = 'suspended'): bool
-    {
-        return $this->profileEntity->suspendProfile($userId, $status);
     }
 
     public function suspendProfileRole(string $roleCode, string $status = 'suspended'): bool

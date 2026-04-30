@@ -9,7 +9,7 @@ use PDO;
 // Entity layer for user profile records in the user_profiles table.
 // Called by profile Controllers such as SearchProfileController.php,
 // ViewProfileDetailsController.php, UpdateProfileController.php,
-// SuspendProfileController.php, and CreateAccountController.php.
+// and SuspendProfileController.php.
 final class UserProfileEntity
 {
     private PDO $db;

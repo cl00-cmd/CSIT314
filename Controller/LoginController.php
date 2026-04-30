@@ -7,7 +7,7 @@ use App\Entity\UserEntity;
 
 // BCE route:
 // Boundary/login.php calls this Controller.
-// This Controller calls Entity/UserEntity.php for user lookup.
+// This Controller calls Entity/UserEntity.php for authentication.
 final class LoginController
 {
     private UserEntity $userEntity;
@@ -28,8 +28,8 @@ final class LoginController
             ];
         }
 
-        $user = $this->userEntity->getByUsername($username);
-        if ($user === null || !password_verify($password, $user['password_hash'])) {
+        $user = $this->userEntity->authenticate($username, $password);
+        if ($user === null) {
             return [
                 'success' => false,
                 'message' => 'Invalid username or password.',
@@ -42,9 +42,6 @@ final class LoginController
                 'message' => 'This account is currently suspended.',
             ];
         }
-
-        unset($user['password_hash']);
-
         return [
             'success' => true,
             'user' => $user,

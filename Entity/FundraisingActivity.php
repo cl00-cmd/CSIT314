@@ -16,7 +16,6 @@ namespace App\Entity;
 // Boundary/FRViewsUI.php -> Controller/FRViewsController.php -> Entity/FundraisingActivity.php.
 // Boundary/FRshortlistUI.php -> Controller/FRshortlistController.php -> Entity/FundraisingActivity.php.
 // Boundary/FRHistorySearchUI.php -> Controller/FRHistorySearchController.php -> Entity/FundraisingActivity.php.
-// Boundary/FRHistoryDateSearchUI.php -> Controller/FRHistoryDateSearchController.php -> Entity/FundraisingActivity.php.
 // Boundary/DSearchUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
 // Boundary/DActivityUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
 // Boundary/DViewFavouriteUI.php -> Controller/DViewFavouriteC.php -> Entity/FundraisingActivity.php.
@@ -67,7 +66,7 @@ final class FundraisingActivity
         return $this->campaignEntity->deleteCampaign($fundraiserUserId, $activityId);
     }
 
-    public function getViews(int $fundraiserUserId, int $activityId = 0): array
+    public function getViewCount(int $fundraiserUserId, int $activityId = 0): array
     {
         $activities = $activityId > 0
             ? array_filter(

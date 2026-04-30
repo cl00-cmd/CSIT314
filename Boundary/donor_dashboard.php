@@ -6,7 +6,6 @@ require_once __DIR__ . '/donor_shared.php';
 use App\Controller\DActivityC;
 use App\Controller\DSearchFavouriteC;
 use App\Controller\DonationHistoryC;
-use App\Entity\DonationEntity;
 
 // BCE route:
 // Boundary/donor_dashboard.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
@@ -22,12 +21,11 @@ $userId = (int) $user['id'];
 $activityController = new DActivityC();
 $favouriteController = new DSearchFavouriteC();
 $historyController = new DonationHistoryC();
-$donationEntity = new DonationEntity();
 
 $activities = $activityController->searchActivity($userId);
 $favourites = $favouriteController->searchFavourite($userId);
 $history = $historyController->displayResults($userId);
-$summary = $donationEntity->getDonorSummary($userId);
+$summary = $historyController->getSummary($userId);
 $recentActivities = array_slice($activities, 0, 4);
 $recentFavourites = array_slice($favourites, 0, 4);
 $recentHistory = array_slice($history, 0, 5);

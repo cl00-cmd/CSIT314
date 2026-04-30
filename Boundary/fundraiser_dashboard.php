@@ -26,7 +26,7 @@ $shortlistController = new FRshortlistController();
 $historyController = new FRHistorySearchController();
 
 $activities = $searchController->searchActivity($userId);
-$views = $viewsController->retrieveViews($userId);
+$views = $viewsController->getViewCount($userId);
 $shortlists = $shortlistController->retrieveShortlistedCount($userId);
 $completedHistory = $historyController->searchHistory($userId);
 

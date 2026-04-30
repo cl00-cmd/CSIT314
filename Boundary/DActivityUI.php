@@ -5,7 +5,6 @@ require_once __DIR__ . '/donor_shared.php';
 
 use App\Controller\DActivityC;
 use App\Controller\DSaveFavouriteC;
-use App\Entity\DonationEntity;
 
 // BCE route:
 // Boundary/DActivityUI.php -> Controller/DActivityC.php -> Entity/FundraisingActivity.php.
@@ -20,26 +19,17 @@ $activityId = (int) ($_GET['activity_id'] ?? $_POST['activity_id'] ?? 0);
 // Boundary -> Controller.
 $activityController = new DActivityC();
 $saveFavouriteController = new DSaveFavouriteC();
-$donationEntity = new DonationEntity();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $result = match ((string) ($_POST['action'] ?? '')) {
         'save_favourite' => $saveFavouriteController->addFavourite($userId, $activityId),
         'remove_favourite' => $saveFavouriteController->removeFavourite($userId, $activityId),
-        'donate' => (function () use ($donationEntity, $userId, $activityId): array {
-            $amount = (float) ($_POST['amount'] ?? 0);
-            if ($activityId <= 0 || $amount <= 0) {
-                return ['success' => false, 'message' => 'Please choose a fundraising activity and donation amount.'];
-            }
-
-            try {
-                $donationEntity->createDonation($userId, $activityId, $amount, trim((string) ($_POST['message'] ?? '')));
-            } catch (\Throwable $exception) {
-                return ['success' => false, 'message' => $exception->getMessage()];
-            }
-
-            return ['success' => true, 'message' => 'Donation recorded successfully.'];
-        })(),
+        'donate' => $activityController->submitDonation(
+            $userId,
+            $activityId,
+            (float) ($_POST['amount'] ?? 0),
+            (string) ($_POST['message'] ?? '')
+        ),
         default => ['success' => false, 'message' => 'Unknown action.'],
     };
 

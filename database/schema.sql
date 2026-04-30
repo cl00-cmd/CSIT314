@@ -52,15 +52,13 @@ CREATE TABLE IF NOT EXISTS campaigns (
     status VARCHAR(20) NOT NULL DEFAULT 'active',
     start_date DATE NOT NULL,
     end_date DATE NULL,
-    completed_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_campaigns_fundraiser FOREIGN KEY (fundraiser_user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_campaigns_category FOREIGN KEY (category_id) REFERENCES categories(id),
     INDEX idx_campaigns_fundraiser (fundraiser_user_id),
     INDEX idx_campaigns_category (category_id),
     INDEX idx_campaigns_status (status),
-    INDEX idx_campaigns_service (service_type),
-    INDEX idx_campaigns_completed_at (completed_at)
+    INDEX idx_campaigns_service (service_type)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS favourites (

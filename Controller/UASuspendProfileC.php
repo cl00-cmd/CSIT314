@@ -18,11 +18,6 @@ final class UASuspendProfileC
         $this->profile = new Profile();
     }
 
-    public function searchProfile(int $userId): ?array
-    {
-        return $this->profile->getProfile($userId);
-    }
-
     public function searchProfileRoles(string $keyword = ''): array
     {
         // Controller -> Entity: ask Profile.php to search role rows in profile_types.

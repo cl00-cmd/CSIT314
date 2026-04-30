@@ -75,7 +75,7 @@ $history = $validation['success']
                                 <td><?= e($activity['service_type']) ?></td>
                                 <td><?= e($activity['status']) ?></td>
                                 <td><?= e(format_currency($activity['current_amount'])) ?></td>
-                                <td><?= e(format_date($activity['completed_at'] ?? $activity['end_date'] ?? $activity['created_at'])) ?></td>
+                                <td><?= e(format_date($activity['end_date'] ?? $activity['created_at'])) ?></td>
                             </tr>
                         <?php endforeach; ?>
                         <?php if ($history === []): ?>

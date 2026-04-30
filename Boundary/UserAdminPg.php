@@ -8,7 +8,7 @@ use App\Controller\UASearchAccController;
 use App\Controller\UserAdminC;
 
 // BCE route for the suspend action:
-// Boundary/UserAdminPg.php -> Controller/UserAdminC.php -> Entity/UserAccount.php.
+// Boundary/UserAdminPg.php -> Controller/UserAdminC.php -> Entity/Account.php.
 // This Boundary only calls Controllers, never Entity classes directly.
 require_login(['user_admin']);
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 require_once __DIR__ . '/donor_shared.php';
 
 use App\Controller\DonationHistoryC;
-use App\Entity\CategoryEntity;
 
 // BCE route:
 // Boundary/DonationHistoryUI.php -> Controller/DonationHistoryC.php -> Entity/Donation.php.
@@ -16,14 +15,13 @@ $userId = (int) $user['id'];
 
 // Boundary -> Controller.
 $historyController = new DonationHistoryC();
-$categoryEntity = new CategoryEntity();
 
 $filters = [
     'history_category_id' => (string) ($_GET['history_category_id'] ?? ''),
     'history_from' => (string) ($_GET['history_from'] ?? ''),
     'history_to' => (string) ($_GET['history_to'] ?? ''),
 ];
-$categories = $categoryEntity->getAll('', true);
+$categories = $historyController->listCategories();
 $history = $historyController->displayResults($userId, $filters);
 ?>
 <!DOCTYPE html>
