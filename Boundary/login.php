@@ -3,11 +3,52 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
-use App\Controller\LoginController;
+use App\Config\Database;
 
-// BCE route:
-// Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
-// This shared Boundary handles login for every role and redirects to the correct dashboard after authentication.
+// Shared login Boundary for every role.
+// User Admin, Fund Raiser, Donor, and Platform Manager all authenticate here.
+function authenticate_user(string $username, string $password): array
+{
+    $username = trim($username);
+    if ($username === '' || $password === '') {
+        return [
+            'success' => false,
+            'message' => 'Please enter both username and password.',
+        ];
+    }
+
+    $db = Database::getConnection();
+    $statement = $db->prepare(
+        'SELECT id, username, full_name, email, password_hash, role, status, created_at
+         FROM users
+         WHERE username = :username
+         LIMIT 1'
+    );
+    $statement->execute(['username' => $username]);
+    $user = $statement->fetch();
+
+    if (!$user || !password_verify($password, $user['password_hash'] ?? '')) {
+        return [
+            'success' => false,
+            'message' => 'Invalid username or password.',
+        ];
+    }
+
+    if ($user['status'] !== 'active') {
+        return [
+            'success' => false,
+            'message' => 'This account is currently suspended.',
+        ];
+    }
+
+    unset($user['password_hash']);
+    return [
+        'success' => true,
+        'user' => $user,
+        'message' => 'Login successful.',
+    ];
+}
+
 if (current_user() !== null) {
     redirect_to_dashboard_for_role((string) current_user()['role']);
 }
@@ -15,9 +56,7 @@ if (current_user() !== null) {
 $flash = pull_flash();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    // Boundary -> Controller.
-    $controller = new LoginController();
-    $result = $controller->authenticate(
+    $result = authenticate_user(
         (string) ($_POST['username'] ?? ''),
         (string) ($_POST['password'] ?? '')
     );
