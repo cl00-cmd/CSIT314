@@ -40,6 +40,7 @@ function redirect_to_dashboard_for_role(string $role): void
 
 function role_dashboard_path(string $role): string
 {
+    // Login is shared; only the post-login dashboard changes by role.
     return match ($role) {
         'user_admin' => 'admin_dashboard.php',
         'fund_raiser' => 'fundraiser_dashboard.php',

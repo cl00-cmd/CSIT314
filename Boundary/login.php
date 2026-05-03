@@ -3,51 +3,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
-use App\Config\Database;
+use App\Controller\LoginController;
 
 // Shared login Boundary for every role.
-// User Admin, Fund Raiser, Donor, and Platform Manager all authenticate here.
-function authenticate_user(string $username, string $password): array
-{
-    $username = trim($username);
-    if ($username === '' || $password === '') {
-        return [
-            'success' => false,
-            'message' => 'Please enter both username and password.',
-        ];
-    }
-
-    $db = Database::getConnection();
-    $statement = $db->prepare(
-        'SELECT id, username, full_name, email, password_hash, role, status, created_at
-         FROM users
-         WHERE username = :username
-         LIMIT 1'
-    );
-    $statement->execute(['username' => $username]);
-    $user = $statement->fetch();
-
-    if (!$user || !password_verify($password, $user['password_hash'] ?? '')) {
-        return [
-            'success' => false,
-            'message' => 'Invalid username or password.',
-        ];
-    }
-
-    if ($user['status'] !== 'active') {
-        return [
-            'success' => false,
-            'message' => 'This account is currently suspended.',
-        ];
-    }
-
-    unset($user['password_hash']);
-    return [
-        'success' => true,
-        'user' => $user,
-        'message' => 'Login successful.',
-    ];
-}
+// BCE route: Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
+// User Admin, Fund Raiser, Donor, and Platform Manager all enter through this one login page.
+// The old role-specific login idea is removed so the system has one login use case only.
 
 if (current_user() !== null) {
     redirect_to_dashboard_for_role((string) current_user()['role']);
@@ -56,12 +17,17 @@ if (current_user() !== null) {
 $flash = pull_flash();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    $result = authenticate_user(
+    // Boundary -> Controller: pass only the submitted credentials to the shared login Controller.
+    // The Controller handles authentication for every user role, so this Boundary does not
+    // choose a role-specific login controller.
+    $controller = new LoginController();
+    $result = $controller->authenticate(
         (string) ($_POST['username'] ?? ''),
         (string) ($_POST['password'] ?? '')
     );
 
     if ($result['success']) {
+        // Store the authenticated user once, then redirect based on the role saved in the user record.
         $_SESSION['auth_user'] = $result['user'];
         set_flash('success', 'Welcome back, ' . $result['user']['full_name'] . '.');
         redirect_to_dashboard_for_role((string) $result['user']['role']);

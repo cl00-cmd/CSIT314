@@ -5,9 +5,9 @@ namespace App\Controller;
 
 use App\Entity\UserEntity;
 
-// BCE route:
-// Boundary/login.php calls this Controller.
-// This Controller calls Entity/UserEntity.php for authentication.
+// Shared login Controller for every role.
+// BCE route: Boundary/login.php -> Controller/LoginController.php -> Entity/UserEntity.php.
+// This Controller is intentionally shared by User Admin, Fund Raiser, Donor, and Platform Manager.
 final class LoginController
 {
     private UserEntity $userEntity;
@@ -20,6 +20,7 @@ final class LoginController
 
     public function authenticate(string $username, string $password): array
     {
+        // Same validation applies to every role because all users submit the same login form.
         $username = trim($username);
         if ($username === '' || $password === '') {
             return [
@@ -28,20 +29,15 @@ final class LoginController
             ];
         }
 
-        $user = $this->userEntity->authenticate($username, $password);
+        // Controller -> Entity: ask UserEntity to verify credentials against the users table.
+        $user = $this->userEntity->findActiveLoginUser($username, $password);
         if ($user === null) {
             return [
                 'success' => false,
-                'message' => 'Invalid username or password.',
+                'message' => 'Invalid username or password, or this account is suspended.',
             ];
         }
 
-        if ($user['status'] !== 'active') {
-            return [
-                'success' => false,
-                'message' => 'This account is currently suspended.',
-            ];
-        }
         return [
             'success' => true,
             'user' => $user,
