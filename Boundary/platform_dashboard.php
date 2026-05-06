@@ -2,38 +2,27 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/platform_shared.php';
 
-use App\Controller\PlatformController;
+use App\Controller\DailyReportC;
+use App\Controller\FSASearchCategoryC;
+use App\Controller\MonthlyReportC;
+use App\Controller\WeeklyReportC;
 
-// BCE route:
-// Boundary/platform_dashboard.php -> Controller/PlatformController.php
-// -> Entity/CategoryEntity.php and Entity/ReportEntity.php.
-// This Boundary collects category/report input and sends it to the Controller.
+// BCE routes for the Platform Manager dashboard:
+// Boundary/platform_dashboard.php -> Controller/FSASearchCategoryC.php -> Entity/FSACategory.php.
+// Boundary/platform_dashboard.php -> Controller/DailyReportC.php -> Entity/DailyReport.php.
+// Boundary/platform_dashboard.php -> Controller/WeeklyReportC.php -> Entity/WeeklyReport.php.
+// Boundary/platform_dashboard.php -> Controller/MonthlyReportC.php -> Entity/MonthlyReport.php.
+// This dashboard only shows summary data and links to the specific Platform Manager sequence pages.
 require_login(['platform_manager']);
 
-// Boundary -> Controller.
-$controller = new PlatformController();
-$user = current_user();
-
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    $action = (string) ($_POST['action'] ?? '');
-    $result = match ($action) {
-        'create_category' => $controller->createCategory($_POST),
-        'update_category' => $controller->updateCategory($_POST),
-        default => ['success' => false, 'message' => 'Unknown action.'],
-    };
-
-    set_flash($result['success'] ? 'success' : 'error', $result['message']);
-    app_redirect('platform_dashboard.php');
-}
-
-$filters = [
-    'period' => (string) ($_GET['period'] ?? 'monthly'),
-    'search' => trim((string) ($_GET['search'] ?? '')),
-];
-$dashboard = $controller->getDashboardData($filters);
-$editCategory = isset($_GET['edit_id']) ? $controller->getCategory((int) $_GET['edit_id']) : null;
-$flash = pull_flash();
+// Boundary -> Controller calls for dashboard counts.
+$categories = (new FSASearchCategoryC())->searchCategory('');
+$dailyReport = (new DailyReportC())->generateReport(date('Y-m-d'))['report'];
+$weeklyReport = (new WeeklyReportC())->generateReport(date('Y-m-d'))['report'];
+$monthlyReport = (new MonthlyReportC())->generateReport(date('Y-m'))['report'];
+$suspendedCategories = count(array_filter($categories, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,187 +33,81 @@ $flash = pull_flash();
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
-    <header class="topbar">
-        <div>
-            <p class="eyebrow">Platform Management</p>
-            <h1>Categories and reporting</h1>
-        </div>
-        <nav class="topbar__nav">
-            <span class="pill">Signed in as <?= e($user['full_name']) ?></span>
-            <a class="button button--ghost" href="logout.php">Logout</a>
-        </nav>
-    </header>
+    <?php render_platform_topbar('Platform Manager Dashboard', 'dashboard'); ?>
 
     <main class="page-shell">
-        <?php if ($flash !== null): ?>
-            <div class="<?= e(flash_class($flash['type'] ?? null)) ?>">
-                <?= e($flash['message'] ?? '') ?>
-            </div>
-        <?php endif; ?>
+        <?php render_platform_flash_if_any(); ?>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <span>Categories</span>
+                <strong><?= e((string) count($categories)) ?></strong>
+            </article>
+            <article class="stat-card">
+                <span>Suspended Categories</span>
+                <strong><?= e((string) $suspendedCategories) ?></strong>
+            </article>
+            <article class="stat-card">
+                <span>Weekly Donations</span>
+                <strong><?= e((string) $weeklyReport['reportDetails']['donationCount']) ?></strong>
+            </article>
+            <article class="stat-card">
+                <span>Monthly Donation Value</span>
+                <strong><?= e(format_currency($monthlyReport['reportDetails']['donationValue'])) ?></strong>
+            </article>
+        </section>
 
         <section class="panel">
-            <div class="panel__header panel__header--stack">
+            <div class="panel__header">
                 <div>
-                    <p class="section-label">Reports</p>
-                    <h2>Daily, weekly, and monthly performance summary</h2>
+                    <h2>Overall Platform Summary</h2>
                 </div>
-                <form method="get" class="inline-filters">
-                    <select name="period">
-                        <option value="daily" <?= selected_if($dashboard['period'], 'daily') ?>>daily</option>
-                        <option value="weekly" <?= selected_if($dashboard['period'], 'weekly') ?>>weekly</option>
-                        <option value="monthly" <?= selected_if($dashboard['period'], 'monthly') ?>>monthly</option>
-                    </select>
-                    <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Search categories">
-                    <button type="submit" class="button button--ghost">Apply</button>
-                </form>
             </div>
 
-            <div class="stats-grid">
-                <article class="stat-card">
-                    <span>New Campaigns</span>
-                    <strong><?= e((string) $dashboard['summary']['new_campaigns']) ?></strong>
-                </article>
-                <article class="stat-card">
-                    <span>Completed Campaigns</span>
-                    <strong><?= e((string) $dashboard['summary']['completed_campaigns']) ?></strong>
-                </article>
-                <article class="stat-card">
-                    <span>Donations</span>
-                    <strong><?= e((string) $dashboard['summary']['donations_count']) ?></strong>
-                </article>
-                <article class="stat-card">
-                    <span>Donation Value</span>
-                    <strong><?= e(format_currency($dashboard['summary']['donations_value'])) ?></strong>
-                </article>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>New Campaigns</th>
+                            <th>Completed Campaigns</th>
+                            <th>Donations</th>
+                            <th>Donation Value</th>
+                            <th>New Users</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Daily</td>
+                            <td><?= e((string) $dailyReport['reportDetails']['newCampaigns']) ?></td>
+                            <td><?= e((string) $dailyReport['reportDetails']['completedCampaigns']) ?></td>
+                            <td><?= e((string) $dailyReport['reportDetails']['donationCount']) ?></td>
+                            <td><?= e(format_currency($dailyReport['reportDetails']['donationValue'])) ?></td>
+                            <td><?= e((string) $dailyReport['reportDetails']['newUsers']) ?></td>
+                            <td><a class="button button--ghost button--small" href="DailyReportUI.php">View</a></td>
+                        </tr>
+                        <tr>
+                            <td>Weekly</td>
+                            <td><?= e((string) $weeklyReport['reportDetails']['newCampaigns']) ?></td>
+                            <td><?= e((string) $weeklyReport['reportDetails']['completedCampaigns']) ?></td>
+                            <td><?= e((string) $weeklyReport['reportDetails']['donationCount']) ?></td>
+                            <td><?= e(format_currency($weeklyReport['reportDetails']['donationValue'])) ?></td>
+                            <td><?= e((string) $weeklyReport['reportDetails']['newUsers']) ?></td>
+                            <td><a class="button button--ghost button--small" href="WeeklyReportUI.php">View</a></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly</td>
+                            <td><?= e((string) $monthlyReport['reportDetails']['newCampaigns']) ?></td>
+                            <td><?= e((string) $monthlyReport['reportDetails']['completedCampaigns']) ?></td>
+                            <td><?= e((string) $monthlyReport['reportDetails']['donationCount']) ?></td>
+                            <td><?= e(format_currency($monthlyReport['reportDetails']['donationValue'])) ?></td>
+                            <td><?= e((string) $monthlyReport['reportDetails']['newUsers']) ?></td>
+                            <td><a class="button button--ghost button--small" href="MonthlyReportUI.php">View</a></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </section>
-
-        <section class="layout-grid">
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Create Category</p>
-                        <h2>Add a new FSA category</h2>
-                    </div>
-                </div>
-
-                <form method="post" class="form-grid">
-                    <input type="hidden" name="action" value="create_category">
-                    <label class="field">
-                        <span>Name</span>
-                        <input type="text" name="name" required>
-                    </label>
-                    <label class="field">
-                        <span>Status</span>
-                        <select name="status">
-                            <option value="active">active</option>
-                            <option value="inactive">inactive</option>
-                        </select>
-                    </label>
-                    <label class="field field--full">
-                        <span>Description</span>
-                        <textarea name="description" rows="5"></textarea>
-                    </label>
-                    <button type="submit" class="button button--primary">Create Category</button>
-                </form>
-            </section>
-
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Update Category</p>
-                        <h2>Edit an existing category</h2>
-                    </div>
-                    <?php if ($editCategory !== null): ?>
-                        <span class="pill">Editing #<?= e((string) $editCategory['id']) ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <form method="post" class="form-grid">
-                    <input type="hidden" name="action" value="update_category">
-                    <input type="hidden" name="category_id" value="<?= e((string) ($editCategory['id'] ?? '')) ?>">
-                    <label class="field">
-                        <span>Name</span>
-                        <input type="text" name="name" value="<?= e($editCategory['name'] ?? '') ?>" required>
-                    </label>
-                    <label class="field">
-                        <span>Status</span>
-                        <select name="status">
-                            <option value="active" <?= selected_if($editCategory['status'] ?? '', 'active') ?>>active</option>
-                            <option value="inactive" <?= selected_if($editCategory['status'] ?? '', 'inactive') ?>>inactive</option>
-                        </select>
-                    </label>
-                    <label class="field field--full">
-                        <span>Description</span>
-                        <textarea name="description" rows="5"><?= e($editCategory['description'] ?? '') ?></textarea>
-                    </label>
-                    <button type="submit" class="button button--primary">Update Category</button>
-                </form>
-            </section>
-        </section>
-
-        <section class="layout-grid">
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Category Register</p>
-                        <h2>Manage FSA categories</h2>
-                    </div>
-                </div>
-
-                <div class="table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Campaigns</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($dashboard['categories'] as $category): ?>
-                                <tr>
-                                    <td><?= e($category['name']) ?></td>
-                                    <td><?= e($category['status']) ?></td>
-                                    <td><?= e((string) $category['campaign_count']) ?></td>
-                                    <td><a class="button button--ghost button--small" href="?edit_id=<?= e((string) $category['id']) ?>">Edit</a></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel__header">
-                    <div>
-                        <p class="section-label">Category Breakdown</p>
-                        <h2>Highest activity by category</h2>
-                    </div>
-                </div>
-
-                <div class="table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Campaigns</th>
-                                <th>Raised</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($dashboard['breakdown'] as $row): ?>
-                                <tr>
-                                    <td><?= e($row['name']) ?></td>
-                                    <td><?= e((string) $row['campaign_count']) ?></td>
-                                    <td><?= e(format_currency($row['amount_raised'])) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
         </section>
     </main>
 </body>
