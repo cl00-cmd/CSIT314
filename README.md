@@ -1,5 +1,7 @@
 # CSIT314 BCE PHP Fundraising System
 
+[![PHP CI/CD (Build • Lint • Test • Deploy)](https://github.com/cl00-cmd/CSIT314/actions/workflows/test.yml/badge.svg)](https://github.com/cl00-cmd/CSIT314/actions/workflows/test.yml)
+
 This project is now rebuilt as a PHP `Boundary -> Controller -> Entity` fundraising website for the CSIT314 assignment.
 
 ## Architecture
