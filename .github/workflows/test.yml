@@ -1,0 +1,106 @@
+﻿name: PHP CI/CD (Build • Lint • Test • Deploy)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: csit314_fundraising
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: csit314_fundraising
+      DB_USER: root
+      DB_PASSWORD: ""
+
+    steps:
+      - name: 🚚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup PHP 8.0
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          extensions: mbstring, pdo, pdo_mysql
+          coverage: none
+          tools: composer
+
+      - name: 📦 Install Composer dependencies (if composer.json exists)
+        run: |
+          if [ -f "composer.json" ]; then
+            composer install --no-interaction --prefer-dist
+          else
+            echo "No composer.json found, skipping install"
+          fi
+
+      - name: ✅ Validate Composer config (if composer.json exists)
+        run: |
+          if [ -f "composer.json" ]; then
+            composer validate --strict
+          else
+            echo "No composer.json found, skipping validation"
+          fi
+
+      - name: 🔎 PHP Syntax Check (lint all files, show all errors)
+        run: find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: 🗄️ Prepare test database
+        run: php database/setup.php
+
+      - name: 🌐 Start website and smoke test login page
+        run: |
+          php -S 127.0.0.1:8000 -t . > server.log 2>&1 &
+          sleep 2
+          curl --fail --location --silent --show-error http://127.0.0.1:8000/Boundary/login.php > login.html
+          grep -qi "login" login.html
+
+      - name: 🧪 Run PHPUnit Tests (if tests exist)
+        run: |
+          if [ -f "vendor/bin/phpunit" ]; then
+            vendor/bin/phpunit
+          elif [ -d "tests" ]; then
+            echo "Tests folder exists, but PHPUnit is not installed"
+            exit 1
+          else
+            echo "No PHPUnit tests found, skipping test step"
+          fi
+
+      - name: 📄 Upload server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-server-log
+          path: server.log
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 🚀 Mock Deployment
+        run: |
+          echo "Build passed. Mock deployment completed successfully."
+          echo "Replace this step with real hosting deployment when server details are available."
