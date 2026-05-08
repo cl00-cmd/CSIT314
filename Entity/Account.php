@@ -82,22 +82,28 @@ final class Account
     public function findAccount(string $keyword = ''): array
     {
         $sql = 'SELECT u.id, u.username, u.full_name, u.email, u.role, u.status, u.created_at,
-                       p.organisation, p.city, p.status AS profile_status
+                       p.organisation, p.city, p.status AS profile_status,
+                       pt.status AS role_status
                 FROM users u
-                LEFT JOIN user_profiles p ON p.user_id = u.id';
+                LEFT JOIN user_profiles p ON p.user_id = u.id
+                LEFT JOIN profile_types pt ON pt.role_code = u.role';
 
         $parameters = [];
         if ($keyword !== '') {
             $sql .= ' WHERE u.username LIKE :username_term
                       OR u.full_name LIKE :full_name_term
                       OR u.email LIKE :email_term
-                      OR u.role LIKE :role_term';
+                      OR u.role LIKE :role_term
+                      OR pt.role_label LIKE :role_label_term
+                      OR pt.status LIKE :role_status_term';
             $term = '%' . $keyword . '%';
             $parameters = [
                 'username_term' => $term,
                 'full_name_term' => $term,
                 'email_term' => $term,
                 'role_term' => $term,
+                'role_label_term' => $term,
+                'role_status_term' => $term,
             ];
         }
 

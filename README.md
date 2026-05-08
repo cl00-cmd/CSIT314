@@ -49,9 +49,10 @@ If you already ran an older version of this project, run `database/setup.php` ag
 
 `database/setup.php` creates starter sample data for local testing:
 
-- 4 demo users
+- 100 demo users: 3 user admins, 5 platform managers, 46 fund raisers, and 46 donors
 - 6 categories
-- 3 campaigns, including completed history records
+- 92 fundraising activities, with active and completed records
+- Donor activity records, including campaign views, favourites, and donations
 
 ## Notes
 
