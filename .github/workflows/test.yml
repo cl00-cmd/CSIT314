@@ -10,9 +10,6 @@ on:
 permissions:
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,15 +37,18 @@ jobs:
 
     steps:
       - name: 🚚 Checkout repository
-        uses: actions/checkout@v4
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout FETCH_HEAD
 
       - name: 🧰 Setup PHP 8.0
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-          extensions: mbstring, pdo, pdo_mysql
-          coverage: none
-          tools: composer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php-cli php-mbstring php-mysql composer
+          php --version
+          php -m | grep -E "mbstring|PDO|pdo_mysql"
 
       - name: 📦 Install Composer dependencies (if composer.json exists)
         run: |
@@ -89,13 +89,6 @@ jobs:
           else
             echo "No PHPUnit tests found, skipping test step"
           fi
-
-      - name: 📄 Upload server log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-server-log
-          path: server.log
 
   deploy:
     runs-on: ubuntu-latest
