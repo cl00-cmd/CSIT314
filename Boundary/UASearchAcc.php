@@ -52,7 +52,8 @@ $hasSearched = $search !== '';
                                 <th>User</th>
                                 <th>Role</th>
                                 <th>Account Status</th>
-                                <th>Profile Status</th>
+                                <th>Role Status</th>
+                                <th>User Profile Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -65,6 +66,7 @@ $hasSearched = $search !== '';
                                     </td>
                                     <td><?= e($user['role']) ?></td>
                                     <td><?= e($user['status']) ?></td>
+                                    <td><?= e($user['role_status'] ?? 'active') ?></td>
                                     <td><?= e($user['profile_status'] ?? 'active') ?></td>
                                     <td class="action-row">
                                         <a class="button button--ghost button--small" href="UAViewAcc.php?id=<?= e((string) $user['id']) ?>">View Account</a>

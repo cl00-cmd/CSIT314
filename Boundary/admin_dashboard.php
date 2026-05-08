@@ -74,7 +74,8 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                             <th>Email</th>
                             <th>Role</th>
                             <th>Account Status</th>
-                            <th>Profile Status</th>
+                            <th>Role Status</th>
+                            <th>User Profile Status</th>
                             <th>Organisation</th>
                             <th>City</th>
                             <th>Actions</th>
@@ -90,6 +91,7 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                                 <td><?= e($account['email']) ?></td>
                                 <td><?= e($account['role']) ?></td>
                                 <td><?= e($account['status']) ?></td>
+                                <td><?= e($account['role_status'] ?? 'active') ?></td>
                                 <td><?= e($account['profile_status'] ?? 'active') ?></td>
                                 <td><?= e($account['organisation'] ?? '-') ?></td>
                                 <td><?= e($account['city'] ?? '-') ?></td>
