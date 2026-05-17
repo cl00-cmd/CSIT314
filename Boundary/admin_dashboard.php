@@ -21,6 +21,7 @@ $suspendProfileController = new UASuspendProfileC();
 
 // Boundary -> Controller calls for dashboard counts.
 //  Gets user accounts, profile records, and profile role records.
+$accounts = $searchUserController->searchUserAccount();
 $profiles = $searchProfileController->searchProfile();
 $profileRoles = $suspendProfileController->searchProfileRoles();
 
