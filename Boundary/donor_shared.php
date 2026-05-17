@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup and shared helper functions
 require_once __DIR__ . '/../bootstrap.php';
 
 // BCE route:
@@ -17,6 +18,7 @@ function donor_nav_items(): array
     ];
 }
 
+// Displays the page title, donor navigation buttons, logged-in donor name, and logout button.
 function render_donor_topbar(string $title, string $activeKey): void
 {
     $user = current_user();
@@ -41,6 +43,7 @@ function render_donor_topbar(string $title, string $activeKey): void
     <?php
 }
 
+// Displays temporary success or error messages.
 function render_donor_flash_if_any(): void
 {
     $flash = pull_flash();

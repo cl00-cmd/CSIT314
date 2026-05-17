@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+// Load the FundraisingActivity Entity class.
 use App\Entity\FundraisingActivity;
 
 // BCE route:
@@ -12,11 +13,13 @@ final class FundraisingActivityC
 {
     private FundraisingActivity $fundraisingActivity;
 
+    // Creates the FundraisingActivity Entity object.
     public function __construct()
     {
         $this->fundraisingActivity = new FundraisingActivity();
     }
 
+    // Validates the fundraising activity details.
     public function validateDetails(array $input, bool $requireFutureStartDate = false): array
     {
         $title = trim((string) ($input['title'] ?? ''));
@@ -69,19 +72,23 @@ final class FundraisingActivityC
         ];
     }
 
+    // Sends the validated fundraising activity details to the Entity.
     public function createActivity(int $fundraiserUserId, array $details): bool
     {
         return $this->fundraisingActivity->setDetails($fundraiserUserId, $details);
     }
 
+    // Validates and saves the new fundraising activity.
     public function saveActivity(int $fundraiserUserId, array $input): array
     {
         $validated = $this->validateDetails($input, true);
+
         if (!$validated['success']) {
             return $validated;
         }
 
         try {
+            // Controller -> Entity to create the fundraising activity.
             $saved = $this->createActivity($fundraiserUserId, $validated['data']);
         } catch (\Throwable) {
             return ['success' => false, 'message' => 'Unable to create the fundraising activity.'];
@@ -89,10 +96,13 @@ final class FundraisingActivityC
 
         return [
             'success' => $saved,
-            'message' => $saved ? 'Fundraising activity created successfully.' : 'Unable to create the fundraising activity.',
+            'message' => $saved
+                ? 'Fundraising activity created successfully.'
+                : 'Unable to create the fundraising activity.',
         ];
     }
 
+    // Retrieves category and service type options for the form.
     public function getFormOptions(): array
     {
         return [

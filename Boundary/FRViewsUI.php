@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup, shared fundraiser layout, and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/fundraiser_shared.php';
 
@@ -11,9 +12,16 @@ use App\Controller\FRViewsController;
 // This Boundary loads the view counts for each Fund Raiser activity.
 require_login(['fund_raiser']);
 
+// Retrieves the logged-in fundraiser.
 $user = current_user();
+
+// Boundary -> Controller to retrieve activity view statistics.
 $controller = new FRViewsController();
+
+// Gets view counts for all fundraising activities created by the fundraiser.
 $views = $controller->getViewCount((int) $user['id']);
+
+// Calculates the total number of views across all activities.
 $totalViews = array_sum(array_column($views, 'viewsCount'));
 ?>
 <!DOCTYPE html>
@@ -25,10 +33,16 @@ $totalViews = array_sum(array_column($views, 'viewsCount'));
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- Fundraiser top navigation bar -->
     <?php render_fundraiser_topbar('FRViewsUI', 'views'); ?>
+
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_fundraiser_flash_if_any(); ?>
 
+        <!-- Views statistics summary -->
         <section class="stats-grid">
             <article class="stat-card">
                 <span>Total Views</span>
@@ -36,6 +50,7 @@ $totalViews = array_sum(array_column($views, 'viewsCount'));
             </article>
         </section>
 
+        <!-- Fundraising activity views table -->
         <section class="panel">
             <div class="panel__header">
                 <div>
@@ -52,7 +67,10 @@ $totalViews = array_sum(array_column($views, 'viewsCount'));
                             <th>Views Count</th>
                         </tr>
                     </thead>
+
                     <tbody>
+
+                        <!-- Display view count for each fundraising activity -->
                         <?php foreach ($views as $view): ?>
                             <tr>
                                 <td><?= e($view['title']) ?></td>
@@ -60,6 +78,16 @@ $totalViews = array_sum(array_column($views, 'viewsCount'));
                                 <td><?= e((string) $view['viewsCount']) ?></td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- Show message when no view data is available -->
+                        <?php if ($views === []): ?>
+                            <tr>
+                                <td colspan="3">
+                                    No fundraising activity views found.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>

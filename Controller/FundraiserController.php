@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+// Load Entity classes used by this Controller.
 use App\Entity\CampaignEntity;
 use App\Entity\CategoryEntity;
 
@@ -24,14 +25,17 @@ final class FundraiserController
     private CampaignEntity $campaignEntity;
     private CategoryEntity $categoryEntity;
 
+    // Creates Entity objects needed for campaign and category data.
     public function __construct()
     {
         // Controller -> Entity for fundraiser FSA/campaign data.
         $this->campaignEntity = new CampaignEntity();
+
         // Controller -> Entity for category dropdown/filter data.
         $this->categoryEntity = new CategoryEntity();
     }
 
+    // Retrieves dashboard summary, active campaigns, history, categories, and service types.
     public function getDashboardData(int $fundraiserUserId, array $filters = []): array
     {
         return [
@@ -48,11 +52,13 @@ final class FundraiserController
         ];
     }
 
+    // Retrieves a selected campaign for editing.
     public function getCampaignForEdit(int $fundraiserUserId, int $campaignId): ?array
     {
         return $this->campaignEntity->getCampaignForFundraiser($fundraiserUserId, $campaignId);
     }
 
+    // Validates and creates a new fundraising activity.
     public function createCampaign(int $fundraiserUserId, array $input): array
     {
         $title = trim((string) ($input['title'] ?? ''));
@@ -66,6 +72,7 @@ final class FundraiserController
         }
 
         try {
+            // Controller -> Entity to create fundraising activity.
             $this->campaignEntity->createCampaign($fundraiserUserId, [
                 'category_id' => (int) ($input['category_id'] ?? 0),
                 'title' => $title,
@@ -83,6 +90,7 @@ final class FundraiserController
         return ['success' => true, 'message' => 'Fundraising activity created successfully.'];
     }
 
+    // Validates and updates an existing fundraising activity.
     public function updateCampaign(int $fundraiserUserId, array $input): array
     {
         $campaignId = (int) ($input['campaign_id'] ?? 0);
@@ -97,6 +105,7 @@ final class FundraiserController
         }
 
         try {
+            // Controller -> Entity to update fundraising activity.
             $this->campaignEntity->updateCampaign($fundraiserUserId, $campaignId, [
                 'category_id' => (int) ($input['category_id'] ?? 0),
                 'title' => $title,

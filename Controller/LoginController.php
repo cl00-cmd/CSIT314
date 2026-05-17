@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+// Load the UserEntity class.
 use App\Entity\UserEntity;
 
 // Shared login Controller for every role.
@@ -12,16 +13,20 @@ final class LoginController
 {
     private UserEntity $userEntity;
 
+    // Creates the UserEntity object.
     public function __construct()
     {
         // Controller -> Entity.
         $this->userEntity = new UserEntity();
     }
 
+    // Validates login credentials and authenticates the user.
     public function authenticate(string $username, string $password): array
     {
-        // Same validation applies to every role because all users submit the same login form.
+        // Removes extra spaces from the username.
         $username = trim($username);
+
+        // Checks whether username or password is empty.
         if ($username === '' || $password === '') {
             return [
                 'success' => false,
@@ -29,8 +34,13 @@ final class LoginController
             ];
         }
 
-        // Controller -> Entity: ask UserEntity to verify credentials against the users table.
-        $user = $this->userEntity->findActiveLoginUser($username, $password);
+        // Controller -> Entity to verify login credentials.
+        $user = $this->userEntity->findActiveLoginUser(
+            $username,
+            $password
+        );
+
+        // Stops login when credentials are invalid or account is suspended.
         if ($user === null) {
             return [
                 'success' => false,
@@ -38,6 +48,7 @@ final class LoginController
             ];
         }
 
+        // Returns authenticated user details.
         return [
             'success' => true,
             'user' => $user,

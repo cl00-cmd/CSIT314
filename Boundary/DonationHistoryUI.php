@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load shared donor layout, helper functions, and system setup
 require_once __DIR__ . '/donor_shared.php';
 
 use App\Controller\DonationHistoryC;
@@ -10,17 +11,21 @@ use App\Controller\DonationHistoryC;
 // This Boundary lets Donors search donation history by FSA category and date period.
 require_login(['donor']);
 
+// Retrieves the logged-in donor details from the session.
 $user = current_user();
 $userId = (int) $user['id'];
 
-// Boundary -> Controller.
+// Boundary -> Controller to retrieve donation history.
 $historyController = new DonationHistoryC();
 
+// Retrieves selected FSA category and donation date range.
 $filters = [
     'history_category_id' => (string) ($_GET['history_category_id'] ?? ''),
     'history_from' => (string) ($_GET['history_from'] ?? ''),
     'history_to' => (string) ($_GET['history_to'] ?? ''),
 ];
+
+// Gets FSA categories for the dropdown and donation records for the table.
 $categories = $historyController->listCategories();
 $history = $historyController->displayResults($userId, $filters);
 ?>
@@ -33,31 +38,54 @@ $history = $historyController->displayResults($userId, $filters);
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- Donor top navigation bar -->
     <?php render_donor_topbar('Donation History', 'history'); ?>
 
     <main class="page-shell donor-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_donor_flash_if_any(); ?>
 
+        <!-- Donation history section -->
         <section class="panel donor-panel">
+
+            <!-- Search form -->
             <div class="panel__header panel__header--stack">
                 <div>
                     <h2>Search donation history</h2>
                 </div>
+
                 <form method="get" class="inline-filters donor-filters donor-filters--history">
                     <select name="history_category_id">
                         <option value="">All FSA categories</option>
+
+                        <!-- Display FSA categories in dropdown -->
                         <?php foreach ($categories as $category): ?>
-                            <option value="<?= e((string) $category['id']) ?>" <?= selected_if($filters['history_category_id'], $category['id']) ?>>
+                            <option value="<?= e((string) $category['id']) ?>"
+                                <?= selected_if($filters['history_category_id'], $category['id']) ?>>
                                 <?= e($category['name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="date" name="history_from" value="<?= e($filters['history_from']) ?>" aria-label="Donation from date">
-                    <input type="date" name="history_to" value="<?= e($filters['history_to']) ?>" aria-label="Donation to date">
-                    <button type="submit" class="button button--primary">Search</button>
+
+                    <input type="date"
+                           name="history_from"
+                           value="<?= e($filters['history_from']) ?>"
+                           aria-label="Donation from date">
+
+                    <input type="date"
+                           name="history_to"
+                           value="<?= e($filters['history_to']) ?>"
+                           aria-label="Donation to date">
+
+                    <button type="submit" class="button button--primary">
+                        Search
+                    </button>
                 </form>
             </div>
 
+            <!-- Donation history table -->
             <div class="table-shell">
                 <table>
                     <thead>
@@ -69,7 +97,9 @@ $history = $historyController->displayResults($userId, $filters);
                             <th>Date</th>
                         </tr>
                     </thead>
+
                     <tbody>
+                        <!-- Display each donation record -->
                         <?php foreach ($history as $donation): ?>
                             <tr>
                                 <td><?= e($donation['campaign_title']) ?></td>
@@ -79,8 +109,14 @@ $history = $historyController->displayResults($userId, $filters);
                                 <td><?= e(format_date($donation['donated_at'])) ?></td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- Show message when no donation history is found -->
                         <?php if ($history === []): ?>
-                            <tr><td colspan="5">No donation history found.</td></tr>
+                            <tr>
+                                <td colspan="5">
+                                    No donation history found.
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

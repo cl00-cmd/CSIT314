@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+// Load the Entity class used by this Controller.
 use App\Entity\Account;
 
 // BCE route:
@@ -12,14 +13,20 @@ final class UASearchAccController
 {
     private Account $account;
 
+    // Creates the Account Entity object.
     public function __construct()
     {
         // Controller -> Entity.
         $this->account = new Account();
     }
 
+    // Searches for user accounts using the given keyword.
     public function searchUserAccount(string $keyword = ''): array
     {
-        return $this->account->findAccount(trim($keyword));
+        // Removes extra spaces from the search keyword.
+        $keyword = trim($keyword);
+
+        // Controller -> Entity to retrieve matching user accounts.
+        return $this->account->findAccount($keyword);
     }
 }

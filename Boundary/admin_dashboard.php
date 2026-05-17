@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup and shared User Admin layout functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/admin_shared.php';
 
@@ -19,10 +20,11 @@ $searchProfileController = new UASearchProfileC();
 $suspendProfileController = new UASuspendProfileC();
 
 // Boundary -> Controller calls for dashboard counts.
-// Account lists come from user records; profile counts come from profile_types because profiles are roles.
-$accounts = $searchUserController->searchUserAccount();
+//  Gets user accounts, profile records, and profile role records.
 $profiles = $searchProfileController->searchProfile();
 $profileRoles = $suspendProfileController->searchProfileRoles();
+
+// Counts suspended user accounts and suspended profile roles.
 $suspendedAccounts = count(array_filter($accounts, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
 $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row): bool => ($row['status'] ?? '') === 'suspended'));
 ?>
@@ -35,30 +37,39 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- User Admin top navigation bar -->
     <?php render_admin_topbar('User Admin Dashboard', 'admin_dashboard.php'); ?>
 
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_flash_if_any(); ?>
 
+        <!-- Dashboard summary cards -->
         <section class="stats-grid">
             <article class="stat-card">
                 <span>User Accounts</span>
                 <strong><?= e((string) count($accounts)) ?></strong>
             </article>
+
             <article class="stat-card">
                 <span>Profile Roles</span>
                 <strong><?= e((string) count($profiles)) ?></strong>
             </article>
+
             <article class="stat-card">
                 <span>Suspended Accounts</span>
                 <strong><?= e((string) $suspendedAccounts) ?></strong>
             </article>
+
             <article class="stat-card">
                 <span>Suspended Roles</span>
                 <strong><?= e((string) $suspendedProfileRoles) ?></strong>
             </article>
         </section>
 
+        <!-- Overall account listing section -->
         <section class="panel">
             <div class="panel__header">
                 <div>
@@ -66,6 +77,7 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                 </div>
             </div>
 
+            <!-- User accounts table -->
             <div class="table-shell">
                 <table>
                     <thead>
@@ -81,13 +93,16 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                             <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody>
+                        <!-- Display each user account record -->
                         <?php foreach ($accounts as $account): ?>
                             <tr>
                                 <td>
                                     <strong><?= e($account['full_name']) ?></strong><br>
                                     <span class="muted"><?= e($account['username']) ?></span>
                                 </td>
+
                                 <td><?= e($account['email']) ?></td>
                                 <td><?= e($account['role']) ?></td>
                                 <td><?= e($account['status']) ?></td>
@@ -95,11 +110,18 @@ $suspendedProfileRoles = count(array_filter($profileRoles, static fn (array $row
                                 <td><?= e($account['profile_status'] ?? 'active') ?></td>
                                 <td><?= e($account['organisation'] ?? '-') ?></td>
                                 <td><?= e($account['city'] ?? '-') ?></td>
+
+                                <!-- Dashboard only links to view and update pages -->
                                 <td class="action-row">
-                                    <!-- Dashboard keeps low-risk actions only.
-                                         Suspension is handled in the dedicated suspend pages. -->
-                                    <a class="button button--ghost button--small" href="UAViewAcc.php?id=<?= e((string) $account['id']) ?>">View</a>
-                                    <a class="button button--ghost button--small" href="UAUpdateAcc.php?id=<?= e((string) $account['id']) ?>">Update</a>
+                                    <a class="button button--ghost button--small"
+                                       href="UAViewAcc.php?id=<?= e((string) $account['id']) ?>">
+                                        View
+                                    </a>
+
+                                    <a class="button button--ghost button--small"
+                                       href="UAUpdateAcc.php?id=<?= e((string) $account['id']) ?>">
+                                        Update
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

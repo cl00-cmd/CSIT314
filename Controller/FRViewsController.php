@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+// Load the FundraisingActivity Entity class.
 use App\Entity\FundraisingActivity;
 
 // BCE route:
@@ -12,13 +13,19 @@ final class FRViewsController
 {
     private FundraisingActivity $fundraisingActivity;
 
+    // Creates the FundraisingActivity Entity object.
     public function __construct()
     {
         $this->fundraisingActivity = new FundraisingActivity();
     }
 
+    // Retrieves the view count for fundraising activities.
     public function getViewCount(int $fundraiserUserId, int $activityId = 0): array
     {
-        return $this->fundraisingActivity->getViewCount($fundraiserUserId, $activityId);
+        // Controller -> Entity to retrieve fundraising activity view totals.
+        return $this->fundraisingActivity->getViewCount(
+            $fundraiserUserId,
+            $activityId
+        );
     }
 }

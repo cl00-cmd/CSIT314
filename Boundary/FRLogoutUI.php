@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 
 // BCE route:

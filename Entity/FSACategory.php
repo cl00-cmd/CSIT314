@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+// Load database connection and PDO.
 use App\Config\Database;
 use PDO;
 
@@ -12,11 +13,13 @@ final class FSACategory
 {
     private PDO $db;
 
+    // Creates the database connection.
     public function __construct()
     {
         $this->db = Database::getConnection();
     }
 
+    // Saves a new FSA category record.
     public function saveCategory(array $categoryData): bool
     {
         $statement = $this->db->prepare(
@@ -31,16 +34,21 @@ final class FSACategory
         ]);
     }
 
+    // Retrieves either one category or all categories.
     public function retrieveCategory(int $categoryID = 0): array
     {
+        // Retrieves one category when a category ID is provided.
         if ($categoryID > 0) {
             $category = $this->getCategory($categoryID);
+
             return $category === null ? [] : [$category];
         }
 
+        // Retrieves all categories when no category ID is provided.
         return $this->searchCategory('');
     }
 
+    // Retrieves one category record by category ID.
     public function getCategory(int $categoryID): ?array
     {
         $statement = $this->db->prepare(
@@ -49,11 +57,14 @@ final class FSACategory
              WHERE id = :category_id
              LIMIT 1'
         );
-        $statement->execute(['category_id' => $categoryID]);
+        $statement->execute([
+            'category_id' => $categoryID,
+        ]);
 
         return $statement->fetch() ?: null;
     }
 
+    // Updates an existing category record.
     public function updateCategory(int $categoryID, array $categoryData): bool
     {
         $statement = $this->db->prepare(
@@ -72,11 +83,13 @@ final class FSACategory
         ]);
     }
 
+    // Suspends the selected category.
     public function suspendCategory(int $categoryID): bool
     {
         return $this->setCategoryStatus($categoryID, 'suspended');
     }
 
+    // Updates the selected category status.
     public function setCategoryStatus(int $categoryID, string $status): bool
     {
         $statement = $this->db->prepare(
@@ -91,6 +104,7 @@ final class FSACategory
         ]);
     }
 
+    // Searches categories using keyword filters.
     public function searchCategory(string $keyword): array
     {
         $sql = 'SELECT c.id AS categoryID, c.name AS categoryName, c.description, c.status, c.created_at,
@@ -99,9 +113,15 @@ final class FSACategory
                 LEFT JOIN campaigns cp ON cp.category_id = c.id';
 
         $parameters = [];
+
+        // Adds keyword search filters when keyword is entered.
         if ($keyword !== '') {
-            $sql .= ' WHERE c.name LIKE :name_term OR c.description LIKE :description_term OR c.status LIKE :status_term';
+            $sql .= ' WHERE c.name LIKE :name_term
+                      OR c.description LIKE :description_term
+                      OR c.status LIKE :status_term';
+
             $term = '%' . $keyword . '%';
+
             $parameters = [
                 'name_term' => $term,
                 'description_term' => $term,
@@ -109,6 +129,7 @@ final class FSACategory
             ];
         }
 
+        // Groups categories and sorts them alphabetically.
         $sql .= ' GROUP BY c.id, c.name, c.description, c.status, c.created_at
                   ORDER BY c.name ASC';
 

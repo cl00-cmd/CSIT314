@@ -1,20 +1,32 @@
 <?php
 declare(strict_types=1);
 
+// Load application setup and database connection.
 require_once dirname(__DIR__) . '/bootstrap.php';
 
 use App\Config\Database;
 
+// Gets the shared database connection.
 $pdo = Database::getConnection();
+
+// Temporarily disables foreign key checks so existing tables can be dropped.
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+
+// Drops existing tables before recreating the schema.
 foreach (['donations', 'campaign_views', 'favourites', 'campaigns', 'user_profiles', 'users', 'categories', 'profile_types'] as $table) {
     $pdo->exec('DROP TABLE IF EXISTS ' . $table);
 }
+
+// Re-enables foreign key checks.
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
+// Runs the database schema file.
 Database::runSchemaFile(__DIR__ . '/schema.sql');
 
+// Creates one shared password hash for all demo accounts.
 $passwordHash = password_hash('password123', PASSWORD_DEFAULT);
+
+// Defines default profile roles.
 $profileTypes = [
     ['user_admin', 'User Admin'],
     ['fund_raiser', 'Fund Raiser'],
@@ -22,9 +34,11 @@ $profileTypes = [
     ['platform_manager', 'Platform Manager'],
 ];
 
+// Inserts default profile roles.
 $profileTypeInsert = $pdo->prepare(
     'INSERT INTO profile_types (role_code, role_label, status) VALUES (:role_code, :role_label, "active")'
 );
+
 foreach ($profileTypes as [$roleCode, $roleLabel]) {
     $profileTypeInsert->execute([
         'role_code' => $roleCode,
@@ -32,9 +46,11 @@ foreach ($profileTypes as [$roleCode, $roleLabel]) {
     ]);
 }
 
+// Inserts default FSA categories.
 $categoryInsert = $pdo->prepare(
     'INSERT INTO categories (name, description, status) VALUES (:name, :description, "active")'
 );
+
 foreach (['Community Support', 'Education', 'Emergency Relief', 'Environment', 'Health Care', 'Shelter and Housing'] as $category) {
     $categoryInsert->execute([
         'name' => $category,
@@ -42,10 +58,12 @@ foreach (['Community Support', 'Education', 'Emergency Relief', 'Environment', '
     ]);
 }
 
+// Prepares user and profile insert statements.
 $userInsert = $pdo->prepare(
     'INSERT INTO users (username, full_name, email, password_hash, role, status)
      VALUES (:username, :full_name, :email, :password_hash, :role, :status)'
 );
+
 $profileInsert = $pdo->prepare(
     'INSERT INTO user_profiles (user_id, phone, organisation, city, biography, status)
      VALUES (:user_id, :phone, :organisation, :city, :biography, "active")'
@@ -53,27 +71,33 @@ $profileInsert = $pdo->prepare(
 
 $users = [];
 
+// Creates demo User Admin accounts.
 for ($i = 1; $i <= 3; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $users[] = ["admin{$suffix}", "User Admin {$suffix}", "admin{$suffix}@example.com", 'user_admin', 'active'];
 }
 
+// Creates demo Platform Manager accounts.
 for ($i = 1; $i <= 5; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $users[] = ["pm{$suffix}", "Platform Manager {$suffix}", "pm{$suffix}@example.com", 'platform_manager', 'active'];
 }
 
+// Creates demo Fund Raiser accounts.
 for ($i = 1; $i <= 46; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $users[] = ["fr{$suffix}", "Fund Raiser {$suffix}", "fr{$suffix}@example.com", 'fund_raiser', 'active'];
 }
 
+// Creates demo Donor accounts.
 for ($i = 1; $i <= 46; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $users[] = ["donor{$suffix}", "Donor {$suffix}", "donor{$suffix}@example.com", 'donor', 'active'];
 }
 
 $userIds = [];
+
+// Inserts demo users and their profile details.
 foreach ($users as [$username, $fullName, $email, $role, $status]) {
     $userInsert->execute([
         'username' => $username,
@@ -83,8 +107,10 @@ foreach ($users as [$username, $fullName, $email, $role, $status]) {
         'role' => $role,
         'status' => $status,
     ]);
+
     $userId = (int) $pdo->lastInsertId();
     $userIds[$username] = $userId;
+
     $profileInsert->execute([
         'user_id' => $userId,
         'phone' => '+65 9' . str_pad((string) $userId, 7, '0', STR_PAD_LEFT),
@@ -99,6 +125,7 @@ foreach ($users as [$username, $fullName, $email, $role, $status]) {
     ]);
 }
 
+// Prepares campaign insert statement.
 $campaignInsert = $pdo->prepare(
     'INSERT INTO campaigns (
         fundraiser_user_id, category_id, title, media, service_type, story,
@@ -109,6 +136,7 @@ $campaignInsert = $pdo->prepare(
      )'
 );
 
+// Defines campaign themes for demo fundraising activities.
 $campaignThemes = [
     ['School Supplies Drive', 2, 'Education'],
     ['Clinic Equipment Fund', 5, 'Health Care'],
@@ -123,6 +151,8 @@ $campaignThemes = [
 ];
 
 $campaignIds = [];
+
+// Creates demo campaigns for each Fund Raiser.
 for ($i = 1; $i <= 46; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $fundraiserId = $userIds["fr{$suffix}"];
@@ -130,12 +160,14 @@ for ($i = 1; $i <= 46; $i++) {
     for ($campaignNumber = 1; $campaignNumber <= 2; $campaignNumber++) {
         $theme = $campaignThemes[($i + $campaignNumber - 2) % count($campaignThemes)];
         [$baseTitle, $categoryId, $serviceType] = $theme;
+
         $status = ($i + $campaignNumber) % 4 === 0 ? 'completed' : 'active';
         $startOffset = '-' . (20 + $i + ($campaignNumber * 9)) . ' days';
         $endOffset = $status === 'completed' ? '-' . (2 + ($i % 18)) . ' days' : null;
         $goal = 2500 + (($i + $campaignNumber) * 175);
 
         $title = $baseTitle . ' ' . $suffix . '-' . $campaignNumber;
+
         $story = sprintf(
             '%s is coordinating %s with local volunteers, donor updates, and tracked progress for test data review.',
             "Fund Raiser {$suffix}",
@@ -160,24 +192,29 @@ for ($i = 1; $i <= 46; $i++) {
     }
 }
 
+// Prepares donor activity insert and update statements.
 $favouriteInsert = $pdo->prepare(
     'INSERT INTO favourites (donor_user_id, campaign_id, created_at)
      VALUES (:donor_user_id, :campaign_id, :created_at)'
 );
+
 $viewInsert = $pdo->prepare(
     'INSERT INTO campaign_views (campaign_id, viewer_user_id, viewed_at)
      VALUES (:campaign_id, :viewer_user_id, :viewed_at)'
 );
+
 $donationInsert = $pdo->prepare(
     'INSERT INTO donations (campaign_id, donor_user_id, amount, message, donated_at)
      VALUES (:campaign_id, :donor_user_id, :amount, :message, :donated_at)'
 );
+
 $campaignTotalUpdate = $pdo->prepare(
     'UPDATE campaigns
      SET current_amount = current_amount + :amount
      WHERE id = :campaign_id'
 );
 
+// Creates demo donor views, favourites, and donations.
 for ($i = 1; $i <= 46; $i++) {
     $suffix = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
     $donorId = $userIds["donor{$suffix}"];
@@ -187,12 +224,14 @@ for ($i = 1; $i <= 46; $i++) {
         $campaignId = $campaignIds[($primaryCampaignIndex + $activityNumber * 7) % count($campaignIds)];
         $viewedAt = date('Y-m-d H:i:s', strtotime('-' . (($i + $activityNumber) % 21) . ' days'));
 
+        // Inserts campaign view record.
         $viewInsert->execute([
             'campaign_id' => $campaignId,
             'viewer_user_id' => $donorId,
             'viewed_at' => $viewedAt,
         ]);
 
+        // Saves the first two viewed campaigns as favourites.
         if ($activityNumber < 2) {
             $favouriteInsert->execute([
                 'donor_user_id' => $donorId,
@@ -203,6 +242,8 @@ for ($i = 1; $i <= 46; $i++) {
 
         $amount = 25 + (($i + $activityNumber) % 8) * 15;
         $donatedAt = date('Y-m-d H:i:s', strtotime('-' . (($i + $activityNumber * 3) % 28) . ' days'));
+
+        // Inserts donation record.
         $donationInsert->execute([
             'campaign_id' => $campaignId,
             'donor_user_id' => $donorId,
@@ -210,6 +251,8 @@ for ($i = 1; $i <= 46; $i++) {
             'message' => 'Test donation from Donor ' . $suffix . ' to show supporter activity.',
             'donated_at' => $donatedAt,
         ]);
+
+        // Updates campaign current amount after donation.
         $campaignTotalUpdate->execute([
             'campaign_id' => $campaignId,
             'amount' => $amount,
@@ -217,6 +260,7 @@ for ($i = 1; $i <= 46; $i++) {
     }
 }
 
+// Displays database seed completion message.
 echo "Database schema created and seeded.\n";
 echo "Seeded 100 users: 3 user admins, 5 platform managers, 46 fund raisers, and 46 donors.\n";
 echo "Seeded " . count($campaignIds) . " fundraising activities plus donor donations, favourites, and views.\n";

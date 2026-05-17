@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup, shared admin layout, and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/admin_shared.php';
 
@@ -11,15 +12,20 @@ use App\Controller\UACreateProfileC;
 // This Boundary only talks to the Controller; it does not call Entity classes directly.
 require_login(['user_admin']);
 
+// Boundary -> Controller to manage user profile roles.
 $controller = new UACreateProfileC();
 
+// Handles create profile role form submission.
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+
     // Boundary -> Control: ask the controller to add a new role type.
     $result = $controller->addProfile((string) ($_POST['role_label'] ?? ''));
+
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
     app_redirect('UACreateProfile.php');
 }
 
+// Gets all existing profile roles.
 $profileTypes = $controller->listProfiles();
 ?>
 <!DOCTYPE html>
@@ -31,9 +37,16 @@ $profileTypes = $controller->listProfiles();
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- User Admin top navigation bar -->
     <?php render_admin_topbar('UACreateProfile', 'UACreateProfile.php'); ?>
+
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_flash_if_any(); ?>
+
+        <!-- Create user profile role section -->
         <section class="panel">
             <div class="panel__header">
                 <div>
@@ -41,16 +54,20 @@ $profileTypes = $controller->listProfiles();
                 </div>
             </div>
 
+            <!-- Create user profile role form -->
             <form method="post" class="form-grid">
                 <label class="field field--full">
                     <span>New Profile Role</span>
                     <input type="text" name="role_label" placeholder="e.g. Volunteer Coordinator" required>
                 </label>
 
-                <button type="submit" class="button button--primary">Create Profile Role</button>
+                <button type="submit" class="button button--primary">
+                    Create Profile Role
+                </button>
             </form>
         </section>
 
+        <!-- Existing user profile roles table -->
         <section class="panel">
             <div class="panel__header">
                 <div>
@@ -67,7 +84,10 @@ $profileTypes = $controller->listProfiles();
                             <th>Status</th>
                         </tr>
                     </thead>
+
                     <tbody>
+
+                        <!-- Display each existing profile role -->
                         <?php foreach ($profileTypes as $profileType): ?>
                             <tr>
                                 <td><?= e($profileType['role_code']) ?></td>
@@ -75,6 +95,16 @@ $profileTypes = $controller->listProfiles();
                                 <td><?= e($profileType['status']) ?></td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- Show message when no profile roles are found -->
+                        <?php if ($profileTypes === []): ?>
+                            <tr>
+                                <td colspan="3">
+                                    No user profile roles found.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>

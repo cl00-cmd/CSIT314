@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup, shared admin layout, and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/admin_shared.php';
 
@@ -12,20 +13,28 @@ use App\Controller\UACreateProfileC;
 // This page is opened from search/view results, so it stays hidden from the dashboard shortcut list.
 require_login(['user_admin']);
 
-// Boundary -> Controller.
+// Boundary -> Controller to retrieve and update user account.
 $controller = new UAUpdateAccController();
+
+// Gets the selected user account ID.
 $userId = (int) ($_GET['id'] ?? $_POST['user_id'] ?? 0);
+
+// Gets the selected account details if a user ID is provided.
 $account = $userId > 0 ? $controller->findAccount($userId) : null;
 
+// Handles update account form submission.
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+
     // Boundary -> Control: submit the edited account fields for update.
     $result = $controller->updateUserAccount($_POST);
+
     set_flash($result['success'] ? 'success' : 'error', $result['message']);
     app_redirect('UAUpdateAcc.php', ['id' => (int) ($_POST['user_id'] ?? 0)]);
 }
 
+// Boundary -> Controller to retrieve available role types.
 $profileController = new UACreateProfileC();
-// Boundary -> Controller -> Entity for available role types.
+
 // Existing roles remain selectable here so an account can keep its current role while being edited.
 $profileTypes = $profileController->listProfiles();
 ?>
@@ -38,49 +47,71 @@ $profileTypes = $profileController->listProfiles();
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- User Admin top navigation bar -->
     <?php render_admin_topbar('UAUpdateAcc', 'UAUpdateAcc.php'); ?>
+
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_flash_if_any(); ?>
+
+        <!-- Update user account section -->
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <h2><?= $account !== null ? e($account['username']) : 'Choose a user account from UASearchAcc' ?></h2>
+                    <h2>
+                        <?= $account !== null ? e($account['username']) : 'Choose a user account from UASearchAcc' ?>
+                    </h2>
                 </div>
             </div>
 
+            <!-- Display update form only when an account is selected -->
             <?php if ($account !== null): ?>
                 <form method="post" class="form-grid">
                     <input type="hidden" name="user_id" value="<?= e((string) $account['id']) ?>">
+
                     <label class="field">
                         <span>Username</span>
                         <input type="text" name="username" value="<?= e($account['username']) ?>" required>
                     </label>
+
                     <label class="field">
                         <span>Full Name</span>
                         <input type="text" name="full_name" value="<?= e($account['full_name']) ?>" required>
                     </label>
+
                     <label class="field">
                         <span>Email</span>
                         <input type="email" name="email" value="<?= e($account['email']) ?>" required>
                     </label>
+
                     <label class="field">
                         <span>New Password</span>
                         <input type="password" name="password" placeholder="Leave blank to keep existing password">
                     </label>
+
                     <label class="field">
                         <span>Role</span>
                         <select name="role">
+
+                            <!-- Display available profile roles and select the current role -->
                             <?php foreach ($profileTypes as $profileType): ?>
                                 <option value="<?= e($profileType['role_code']) ?>" <?= selected_if($account['role'], $profileType['role_code']) ?>>
                                     <?= e($profileType['role_label']) ?>
                                 </option>
                             <?php endforeach; ?>
+
                         </select>
                     </label>
+
                     <!-- Keep the existing account status during normal account edits.
                          Account suspension/reactivation belongs to Boundary/UserAdminPg.php. -->
                     <input type="hidden" name="status" value="<?= e($account['status']) ?>">
-                    <button type="submit" class="button button--primary">Update Account</button>
+
+                    <button type="submit" class="button button--primary">
+                        Update Account
+                    </button>
                 </form>
             <?php endif; ?>
         </section>

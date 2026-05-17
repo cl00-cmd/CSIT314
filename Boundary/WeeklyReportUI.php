@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup, shared platform layout, and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/platform_shared.php';
 
@@ -11,8 +12,13 @@ use App\Controller\WeeklyReportC;
 // This Boundary collects the selected week period and displays the generated report.
 require_login(['platform_manager']);
 
+// Gets the selected week period or defaults to today's date.
 $weekPeriod = (string) ($_GET['weekPeriod'] ?? date('Y-m-d'));
+
+// Boundary -> Controller to generate the weekly report.
 $result = (new WeeklyReportC())->generateReport($weekPeriod);
+
+// Retrieves the generated report data.
 $report = $result['report'];
 ?>
 <!DOCTYPE html>
@@ -24,31 +30,63 @@ $report = $result['report'];
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- Platform manager top navigation bar -->
     <?php render_platform_topbar('WeeklyReportUI', 'weekly'); ?>
 
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_platform_flash_if_any(); ?>
+
+        <!-- Display report generation error message -->
         <?php if (!$result['success']): ?>
-            <div class="flash flash--error"><?= e($result['message']) ?></div>
+            <div class="flash flash--error">
+                <?= e($result['message']) ?>
+            </div>
         <?php endif; ?>
 
+        <!-- Weekly report generation section -->
         <section class="panel">
             <div class="panel__header panel__header--stack">
                 <div>
                     <h2>Generate Weekly Report</h2>
                 </div>
+
+                <!-- Weekly report filter form -->
                 <form method="get" class="inline-filters">
                     <input type="date" name="weekPeriod" value="<?= e($weekPeriod) ?>">
-                    <button type="submit" class="button button--ghost">Generate</button>
+
+                    <button type="submit" class="button button--ghost">
+                        Generate
+                    </button>
                 </form>
             </div>
 
+            <!-- Display generated weekly report summary -->
             <?php if ($report !== null): ?>
                 <div class="stats-grid">
-                    <article class="stat-card"><span>Report ID</span><strong><?= e($report['reportID']) ?></strong></article>
-                    <article class="stat-card"><span>Week Period</span><strong><?= e($report['weekPeriod']) ?></strong></article>
-                    <article class="stat-card"><span>Donations</span><strong><?= e((string) $report['reportDetails']['donationCount']) ?></strong></article>
-                    <article class="stat-card"><span>Donation Value</span><strong><?= e(format_currency($report['reportDetails']['donationValue'])) ?></strong></article>
+
+                    <article class="stat-card">
+                        <span>Report ID</span>
+                        <strong><?= e($report['reportID']) ?></strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>Week Period</span>
+                        <strong><?= e($report['weekPeriod']) ?></strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>Donations</span>
+                        <strong><?= e((string) $report['reportDetails']['donationCount']) ?></strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>Donation Value</span>
+                        <strong><?= e(format_currency($report['reportDetails']['donationValue'])) ?></strong>
+                    </article>
+
                 </div>
             <?php endif; ?>
         </section>

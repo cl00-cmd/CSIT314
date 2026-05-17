@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+// Load database connection and PDO.
 use App\Config\Database;
 use PDO;
 
@@ -12,11 +13,13 @@ final class CampaignEntity
 {
     private PDO $db;
 
+    // Creates the database connection.
     public function __construct()
     {
         $this->db = Database::getConnection();
     }
 
+    // Retrieves dashboard summary statistics for a Fund Raiser.
     public function getFundraiserStats(int $fundraiserUserId): array
     {
         $summaryStatement = $this->db->prepare(
@@ -31,6 +34,7 @@ final class CampaignEntity
         $summaryStatement->execute(['fundraiser_user_id' => $fundraiserUserId]);
         $summary = $summaryStatement->fetch() ?: [];
 
+        // Retrieves total views and shortlists for the Fund Raiser's campaigns.
         $interestStatement = $this->db->prepare(
             "SELECT
                 (SELECT COUNT(*)
@@ -48,6 +52,7 @@ final class CampaignEntity
         ]);
         $interest = $interestStatement->fetch() ?: [];
 
+        // Returns default values merged with database results.
         return array_merge([
             'total_campaigns' => 0,
             'active_campaigns' => 0,
@@ -58,6 +63,7 @@ final class CampaignEntity
         ], $summary, $interest);
     }
 
+    // Retrieves campaigns created by a Fund Raiser, with optional filters.
     public function getCampaignsByFundraiser(int $fundraiserUserId, array $filters = []): array
     {
         $sql = "SELECT c.id, c.title, c.media, c.service_type, c.story, c.funding_goal, c.current_amount,
@@ -81,10 +87,13 @@ final class CampaignEntity
 
         $parameters = ['fundraiser_user_id' => $fundraiserUserId];
 
+        // Filter by campaign status.
         if (!empty($filters['status'])) {
             $sql .= ' AND c.status = :status';
             $parameters['status'] = $filters['status'];
         }
+
+        // Filter by keyword across title, story, service type, and category.
         if (!empty($filters['keyword'])) {
             $sql .= ' AND (
                 c.title LIKE :title_term
@@ -98,26 +107,35 @@ final class CampaignEntity
             $parameters['service_term'] = $term;
             $parameters['category_term'] = $term;
         }
+
+        // Filter by service type.
         if (!empty($filters['service_type'])) {
             $sql .= ' AND c.service_type = :service_type';
             $parameters['service_type'] = $filters['service_type'];
         }
+
+        // Filter by start date of history period.
         if (!empty($filters['from'])) {
             $sql .= ' AND DATE(COALESCE(c.end_date, c.created_at)) >= :from_date';
             $parameters['from_date'] = $filters['from'];
         }
+
+        // Filter by end date of history period.
         if (!empty($filters['to'])) {
             $sql .= ' AND DATE(COALESCE(c.end_date, c.created_at)) <= :to_date';
             $parameters['to_date'] = $filters['to'];
         }
 
         $sql .= ' ORDER BY c.created_at DESC, c.id DESC';
+
+        // Executes the campaign search query.
         $statement = $this->db->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
+    // Retrieves one campaign owned by the Fund Raiser for editing.
     public function getCampaignForFundraiser(int $fundraiserUserId, int $campaignId): ?array
     {
         $statement = $this->db->prepare(
@@ -136,6 +154,7 @@ final class CampaignEntity
         return $statement->fetch() ?: null;
     }
 
+    // Creates a new fundraising campaign.
     public function createCampaign(int $fundraiserUserId, array $data): bool
     {
         $statement = $this->db->prepare(
@@ -162,6 +181,7 @@ final class CampaignEntity
         ]);
     }
 
+    // Updates an existing fundraising campaign.
     public function updateCampaign(int $fundraiserUserId, int $campaignId, array $data): bool
     {
         $statement = $this->db->prepare(
@@ -194,6 +214,7 @@ final class CampaignEntity
         ]);
     }
 
+    // Deletes a campaign owned by the Fund Raiser.
     public function deleteCampaign(int $fundraiserUserId, int $campaignId): bool
     {
         $statement = $this->db->prepare(
@@ -208,6 +229,7 @@ final class CampaignEntity
         ]);
     }
 
+    // Retrieves campaigns that donors can search and view.
     public function getDiscoverableCampaigns(int $donorUserId, array $filters = []): array
     {
         $sql = "SELECT c.id, c.title, c.service_type, c.story, c.funding_goal, c.current_amount,
@@ -236,6 +258,7 @@ final class CampaignEntity
 
         $parameters = ['donor_user_id' => $donorUserId];
 
+        // Filter donor search by keyword.
         if (!empty($filters['search'])) {
             $sql .= ' AND (
                 c.title LIKE :title_term
@@ -249,26 +272,35 @@ final class CampaignEntity
             $parameters['service_term'] = $term;
             $parameters['category_term'] = $term;
         }
+
+        // Filter donor search by category.
         if (!empty($filters['category_id'])) {
             $sql .= ' AND c.category_id = :category_id';
             $parameters['category_id'] = (int) $filters['category_id'];
         }
+
+        // Filter donor search by start date.
         if (!empty($filters['from'])) {
             $sql .= ' AND DATE(c.created_at) >= :from_date';
             $parameters['from_date'] = $filters['from'];
         }
+
+        // Filter donor search by end date.
         if (!empty($filters['to'])) {
             $sql .= ' AND DATE(c.created_at) <= :to_date';
             $parameters['to_date'] = $filters['to'];
         }
 
         $sql .= ' ORDER BY c.status ASC, c.created_at DESC, c.id DESC';
+
+        // Executes donor search query.
         $statement = $this->db->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
+    // Retrieves campaigns saved in a donor favourite list.
     public function getFavouriteCampaigns(int $donorUserId, array $filters = []): array
     {
         $sql = "SELECT c.id, c.title, c.service_type, c.funding_goal, c.current_amount, c.status,
@@ -293,6 +325,7 @@ final class CampaignEntity
 
         $parameters = ['donor_user_id' => $donorUserId];
 
+        // Filter favourite list by search keyword.
         if (!empty($filters['favourite_search'])) {
             $sql .= ' AND (
                 c.title LIKE :favourite_title_term
@@ -308,12 +341,15 @@ final class CampaignEntity
         }
 
         $sql .= ' ORDER BY f.created_at DESC';
+
+        // Executes favourite list search query.
         $statement = $this->db->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
+    // Retrieves details for one campaign from the donor side.
     public function getCampaignDetails(int $campaignId, int $donorUserId): ?array
     {
         $statement = $this->db->prepare(
@@ -349,6 +385,7 @@ final class CampaignEntity
         return $statement->fetch() ?: null;
     }
 
+    // Records that a campaign has been viewed.
     public function recordView(int $campaignId, ?int $viewerUserId): void
     {
         $statement = $this->db->prepare(
@@ -361,6 +398,7 @@ final class CampaignEntity
         ]);
     }
 
+    // Adds a campaign into a donor favourite list.
     public function addFavourite(int $donorUserId, int $campaignId): bool
     {
         $statement = $this->db->prepare(
@@ -374,6 +412,7 @@ final class CampaignEntity
         ]);
     }
 
+    // Removes a campaign from a donor favourite list.
     public function removeFavourite(int $donorUserId, int $campaignId): bool
     {
         $statement = $this->db->prepare(

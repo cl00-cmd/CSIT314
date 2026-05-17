@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+// Load database connection and PDO.
 use App\Config\Database;
 use PDO;
 
@@ -17,11 +18,13 @@ final class Account
 {
     private PDO $db;
 
+    // Creates the database connection.
     public function __construct()
     {
         $this->db = Database::getConnection();
     }
 
+    // Creates a new user account and user profile record.
     public function createAccount(array $accountData): bool
     {
         $data = [
@@ -41,6 +44,7 @@ final class Account
         try {
             $this->db->beginTransaction();
 
+            // Insert account details into the users table.
             $statement = $this->db->prepare(
                 'INSERT INTO users (username, full_name, email, password_hash, role, status)
                  VALUES (:username, :full_name, :email, :password_hash, :role, :status)'
@@ -54,7 +58,10 @@ final class Account
                 'status' => $data['status'],
             ]);
 
+            // Get the newly created user ID.
             $userId = (int) $this->db->lastInsertId();
+
+            // Insert extra profile details into the user_profiles table.
             $profileStatement = $this->db->prepare(
                 'INSERT INTO user_profiles (user_id, phone, organisation, city, biography, status)
                  VALUES (:user_id, :phone, :organisation, :city, :biography, :status)'
@@ -71,6 +78,8 @@ final class Account
             $this->db->commit();
             return true;
         } catch (\Throwable $exception) {
+
+            // Roll back changes if account/profile creation fails.
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -79,6 +88,7 @@ final class Account
         }
     }
 
+    // Searches user accounts using keyword filters.
     public function findAccount(string $keyword = ''): array
     {
         $sql = 'SELECT u.id, u.username, u.full_name, u.email, u.role, u.status, u.created_at,
@@ -89,6 +99,8 @@ final class Account
                 LEFT JOIN profile_types pt ON pt.role_code = u.role';
 
         $parameters = [];
+
+        // Adds search conditions when a keyword is entered.
         if ($keyword !== '') {
             $sql .= ' WHERE u.username LIKE :username_term
                       OR u.full_name LIKE :full_name_term
@@ -108,12 +120,15 @@ final class Account
         }
 
         $sql .= ' ORDER BY u.created_at DESC, u.id DESC';
+
+        // Executes the search query and returns matching accounts.
         $statement = $this->db->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
+    // Retrieves one user account by user ID.
     public function getuser(int $userId): ?array
     {
         $statement = $this->db->prepare(
@@ -127,6 +142,7 @@ final class Account
         return $statement->fetch() ?: null;
     }
 
+    // Updates an existing user account.
     public function updateUserAccount(array $accountData): bool
     {
         $fields = [
@@ -136,6 +152,7 @@ final class Account
             'role = :role',
             'status = :status',
         ];
+
         $parameters = [
             'user_id' => (int) $accountData['user_id'],
             'username' => $accountData['username'],
@@ -145,6 +162,7 @@ final class Account
             'status' => $accountData['status'],
         ];
 
+        // Updates password only when a new password is entered.
         if (!empty($accountData['password'])) {
             $fields[] = 'password_hash = :password_hash';
             $parameters['password_hash'] = password_hash((string) $accountData['password'], PASSWORD_DEFAULT);
@@ -159,6 +177,7 @@ final class Account
         return $statement->execute($parameters);
     }
 
+    // Suspends or reactivates a user account.
     public function setAccountStatus(int $userId, string $status): bool
     {
         $statement = $this->db->prepare(

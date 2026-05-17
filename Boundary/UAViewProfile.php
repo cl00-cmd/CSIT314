@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load system setup, shared admin layout, and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/admin_shared.php';
 
@@ -11,10 +12,16 @@ use App\Controller\UAViewProfileC;
 // This Boundary views profile roles from profile_types through the Controller.
 require_login(['user_admin']);
 
-// Boundary -> Controller.
+// Boundary -> Controller to retrieve profile role details.
 $controller = new UAViewProfileC();
+
+// Gets the selected profile role code.
 $roleCode = trim((string) ($_GET['role_code'] ?? ''));
+
+// Gets selected profile role details if a role code is provided.
 $profile = $roleCode !== '' ? $controller->findProfile($roleCode) : null;
+
+// Gets all profile roles for the table.
 $profileRoles = $controller->listProfiles();
 ?>
 <!DOCTYPE html>
@@ -26,16 +33,26 @@ $profileRoles = $controller->listProfiles();
     <link rel="stylesheet" href="../assets/css/app.css">
 </head>
 <body>
+
+    <!-- User Admin top navigation bar -->
     <?php render_admin_topbar('UAViewProfile', 'UASearchProfile.php'); ?>
+
     <main class="page-shell">
+
+        <!-- Display success or error message if available -->
         <?php render_flash_if_any(); ?>
+
+        <!-- View selected profile role section -->
         <section class="panel">
             <div class="panel__header">
                 <div>
-                    <h2><?= $profile !== null ? e($profile['role_label']) : 'View all profile roles' ?></h2>
+                    <h2>
+                        <?= $profile !== null ? e($profile['role_label']) : 'View all profile roles' ?>
+                    </h2>
                 </div>
             </div>
 
+            <!-- Display selected profile role details -->
             <?php if ($profile !== null): ?>
                 <div class="layout-grid">
                     <article class="card card--soft">
@@ -46,6 +63,8 @@ $profileRoles = $controller->listProfiles();
                         <p><strong>Created:</strong> <?= e(format_date($profile['created_at'] ?? null)) ?></p>
                     </article>
                 </div>
+
+            <!-- Show message when selected profile role cannot be found -->
             <?php elseif ($roleCode !== ''): ?>
                 <div class="flash flash--error">
                     Profile role not found.
@@ -53,6 +72,7 @@ $profileRoles = $controller->listProfiles();
             <?php endif; ?>
         </section>
 
+        <!-- All profile roles table -->
         <section class="panel">
             <div class="panel__header">
                 <div>
@@ -71,19 +91,41 @@ $profileRoles = $controller->listProfiles();
                             <th>Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
+
+                        <!-- Display each profile role -->
                         <?php foreach ($profileRoles as $profileRole): ?>
                             <tr>
                                 <td><?= e($profileRole['role_code']) ?></td>
                                 <td><strong><?= e($profileRole['role_label']) ?></strong></td>
                                 <td><?= e($profileRole['status']) ?></td>
                                 <td><?= e(format_date($profileRole['created_at'] ?? null)) ?></td>
+
+                                <!-- Profile role action buttons -->
                                 <td class="action-row">
-                                    <a class="button button--ghost button--small" href="UAViewProfile.php?role_code=<?= e(rawurlencode((string) $profileRole['role_code'])) ?>">View Profile</a>
-                                    <a class="button button--ghost button--small" href="UAUpdateProfile.php?role_code=<?= e(rawurlencode((string) $profileRole['role_code'])) ?>">Update Profile</a>
+                                    <a class="button button--ghost button--small"
+                                       href="UAViewProfile.php?role_code=<?= e(rawurlencode((string) $profileRole['role_code'])) ?>">
+                                        View Profile
+                                    </a>
+
+                                    <a class="button button--ghost button--small"
+                                       href="UAUpdateProfile.php?role_code=<?= e(rawurlencode((string) $profileRole['role_code'])) ?>">
+                                        Update Profile
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- Show message when no profile roles are found -->
+                        <?php if ($profileRoles === []): ?>
+                            <tr>
+                                <td colspan="5">
+                                    No profile roles found.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>

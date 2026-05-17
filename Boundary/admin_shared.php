@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
+// Load shared system setup and helper functions
 require_once __DIR__ . '/../bootstrap.php';
 
 // Shared helpers for the User Admin boundaries so navigation and flash messages stay consistent.
+// Stores all navigation links used in the admin topbar
 function admin_nav_items(): array
 {
     return [
@@ -17,6 +19,7 @@ function admin_nav_items(): array
     ];
 }
 
+//  Displays the page title, navigation buttons, logged-in user name, and logout button
 function render_admin_topbar(string $title, string $activePage): void
 {
     $user = current_user();
@@ -40,6 +43,7 @@ function render_admin_topbar(string $title, string $activePage): void
     <?php
 }
 
+// Displays temporary success or error messages
 function render_flash_if_any(): void
 {
     $flash = pull_flash();
